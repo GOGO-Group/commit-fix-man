@@ -19,4 +19,10 @@ contextBridge.exposeInMainWorld('api', {
   clearPlanAll: (data) => ipcRenderer.invoke('clear-plan-all', data),
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (data) => ipcRenderer.invoke('save-settings', data),
+  onCommitProgress: (callback) => {
+    ipcRenderer.on('commit-progress', (event, data) => callback(data));
+  },
+  removeCommitProgress: () => {
+    ipcRenderer.removeAllListeners('commit-progress');
+  },
 });

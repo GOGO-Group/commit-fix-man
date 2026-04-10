@@ -259,6 +259,25 @@
       </div>
     </div>
 
+    <!-- Progress Modal -->
+    <div class="modal-overlay" id="progressModalOverlay">
+      <div class="modal modal-sm">
+        <div class="modal-header">
+          <h2 id="progressModalTitle">Committing...</h2>
+        </div>
+        <div class="modal-body">
+          <div class="progress-info">
+            <span id="progressRepo"></span>
+            <span id="progressCount">0 / 0</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progressBarFill"></div>
+          </div>
+          <p class="progress-date" id="progressDate"></p>
+        </div>
+      </div>
+    </div>
+
     <script>
       // ======== State ========
       let allCommits = [];
@@ -574,7 +593,11 @@
             } else {
               const dateStr = cellDate.toISOString().substring(0, 10);
               const count = dateMap[dateStr] || 0;
-              cell.classList.add(getIntensityClass(count));
+              if (count === 0 && options.othersOnly && options.othersOnly.has(dateStr)) {
+                cell.classList.add('level-others');
+              } else {
+                cell.classList.add(getIntensityClass(count));
+              }
               cell.dataset.date = dateStr;
               cell.dataset.count = count;
               if (planMap) {
@@ -738,13 +761,29 @@
         );
       }
 
+      // Get dates where others committed but I have no commits
+      function getOthersOnlyDates(allRawCommits, myCommits, year) {
+        const prefix = String(year);
+        const allDates = new Set();
+        allRawCommits.forEach(c => {
+          if (c.date && c.date.startsWith(prefix)) allDates.add(c.date);
+        });
+        const myDates = new Set();
+        myCommits.forEach(c => {
+          if (c.date && c.date.startsWith(prefix)) myDates.add(c.date);
+        });
+        const othersOnly = new Set();
+        allDates.forEach(d => { if (!myDates.has(d)) othersOnly.add(d); });
+        return othersOnly;
+      }
+
       function renderAllCalendar() {
         const unflaggedRepos = new Set(
           repos.filter((r) => !r.flagged).map((r) => r.name),
         );
-        const unflaggedCommits = filterMyCommits(
-          allCommits.filter((c) => unflaggedRepos.has(c.repo)),
-        );
+        const unflaggedAll = allCommits.filter((c) => unflaggedRepos.has(c.repo));
+        const unflaggedCommits = filterMyCommits(unflaggedAll);
+        const othersOnly = getOthersOnlyDates(unflaggedAll, unflaggedCommits, currentYear);
         const allDateMap = getDateCountMap(unflaggedCommits, currentYear);
         const allDateRepoMap = getDateRepoMap(unflaggedCommits, currentYear);
         const allPlanMap = buildAllPlanMap(currentYear);
@@ -758,6 +797,7 @@
           allPlanMap: allPlanMap,
           clickable: !!selectedRepo,
           repoDateMap: allDateMap,
+          othersOnly: othersOnly,
         });
       }
 
@@ -765,9 +805,9 @@
         const titleEl = document.getElementById("selectedCalendarTitle");
         if (selectedRepo) {
           titleEl.textContent = `Selected: ${selectedRepo}`;
-          const repoCommits = filterMyCommits(
-            allCommits.filter((c) => c.repo === selectedRepo),
-          );
+          const repoAll = allCommits.filter((c) => c.repo === selectedRepo);
+          const repoCommits = filterMyCommits(repoAll);
+          const othersOnly = getOthersOnlyDates(repoAll, repoCommits, currentYear);
           const repoDateMap = getDateCountMap(repoCommits, currentYear);
           const planMap = {};
           for (const [date, count] of Object.entries(currentPlan)) {
@@ -784,6 +824,7 @@
             tooltipMode: "selected",
             repoDateMap: repoDateMap,
             planMap: planMap,
+            othersOnly: othersOnly,
           });
         } else {
           titleEl.textContent = "Selected Repository (none)";
@@ -847,7 +888,31 @@
         renderRepoList();
       }
 
-      // Save buttons - clear stored commit data after save
+      // ======== Progress Modal ========
+      const progressModalOverlay = document.getElementById('progressModalOverlay');
+
+      function openProgressModal(title) {
+        document.getElementById('progressModalTitle').textContent = title;
+        document.getElementById('progressRepo').textContent = '';
+        document.getElementById('progressCount').textContent = '0 / 0';
+        document.getElementById('progressBarFill').style.width = '0%';
+        document.getElementById('progressDate').textContent = '';
+        progressModalOverlay.classList.add('open');
+      }
+
+      function updateProgress(data, globalOffset, globalTotal) {
+        const done = globalOffset + data.current;
+        document.getElementById('progressRepo').textContent = data.repoName;
+        document.getElementById('progressCount').textContent = `${done} / ${globalTotal}`;
+        document.getElementById('progressBarFill').style.width = `${Math.round((done / globalTotal) * 100)}%`;
+        document.getElementById('progressDate').textContent = data.date;
+      }
+
+      function closeProgressModal() {
+        progressModalOverlay.classList.remove('open');
+      }
+
+      // Save buttons - execute commits with progress, then clear plan data
       document
         .getElementById("saveSelectedBtn")
         .addEventListener("click", async () => {
@@ -856,9 +921,13 @@
             alert('Please set username and email in Settings first.');
             return;
           }
-          const btn = document.getElementById('saveSelectedBtn');
-          btn.disabled = true;
-          btn.textContent = 'Committing...';
+
+          const total = Object.values(currentPlan).reduce((s, v) => s + v, 0);
+          openProgressModal(`Committing to ${selectedRepo}`);
+
+          window.api.onCommitProgress((data) => {
+            updateProgress(data, 0, total);
+          });
 
           const result = await window.api.executePlan({
             repoName: selectedRepo,
@@ -866,6 +935,8 @@
             username: settings.username,
             email: settings.email,
           });
+
+          window.api.removeCommitProgress();
 
           if (result.success) {
             await window.api.clearPlanRepo({ repoName: selectedRepo });
@@ -878,7 +949,7 @@
           } else {
             alert('Commit failed: ' + result.message);
           }
-          btn.textContent = 'Save';
+          closeProgressModal();
         });
       document
         .getElementById("saveAllBtn")
@@ -887,9 +958,14 @@
             alert('Please set username and email in Settings first.');
             return;
           }
-          const btn = document.getElementById('saveAllBtn');
-          btn.disabled = true;
-          btn.textContent = 'Committing...';
+
+          const globalTotal = Object.values(plansSummary).reduce((s, v) => s + v, 0);
+          openProgressModal('Committing to all repositories');
+          let globalOffset = 0;
+
+          window.api.onCommitProgress((data) => {
+            updateProgress(data, globalOffset, globalTotal);
+          });
 
           let failed = false;
           for (const [repoName, dates] of Object.entries(allPlans)) {
@@ -904,7 +980,10 @@
               failed = true;
               break;
             }
+            globalOffset += Object.values(dates).reduce((s, v) => s + v, 0);
           }
+
+          window.api.removeCommitProgress();
 
           if (!failed) {
             await window.api.clearPlanAll({});
@@ -915,7 +994,7 @@
           await loadAllCommits();
           renderCalendars();
           updatePlanActions();
-          btn.textContent = 'Save All';
+          closeProgressModal();
         });
 
       // ======== Clear Modal ========

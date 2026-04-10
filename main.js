@@ -333,8 +333,9 @@ ipcMain.handle(
       const dummyFile = path.join(repoPath, '.commit-log');
       let totalCommits = 0;
 
-      // plan is { "YYYY-MM-DD": count, ... }
+      // Calculate grand total for progress
       const entries = Object.entries(plan).sort((a, b) => a[0].localeCompare(b[0]));
+      const grandTotal = entries.reduce((s, [, c]) => s + c, 0);
 
       for (const [date, count] of entries) {
         for (let i = 0; i < count; i++) {
@@ -362,6 +363,14 @@ ipcMain.handle(
             .commit(commitMsg);
 
           totalCommits++;
+
+          // Send progress to renderer
+          event.sender.send('commit-progress', {
+            repoName,
+            current: totalCommits,
+            total: grandTotal,
+            date,
+          });
         }
       }
 
