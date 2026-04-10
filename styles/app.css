@@ -835,6 +835,22 @@ body {
   text-align: center;
 }
 
+.progress-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #21262d;
+  border-top-color: #58a6ff;
+  border-radius: 50%;
+  margin: 12px auto;
+  animation: spin 0.8s linear infinite;
+}
+
+.progress-spinner-text {
+  font-size: 0.85rem;
+  color: #8b949e;
+  text-align: center;
+}
+
 /* Settings dot indicator */
 .settings-dot {
   width: 7px;

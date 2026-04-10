@@ -393,3 +393,49 @@ ipcMain.handle(
     }
   },
 );
+
+// Fork: rewrite commit author/committer using git filter-branch
+ipcMain.handle(
+  'fork-repo',
+  async (event, { repoName, forkEmail, username, email }) => {
+    const repoPath = path.join(REPO_DIR, repoName);
+    if (!fs.existsSync(repoPath)) {
+      return { success: false, message: 'Repository not found' };
+    }
+    if (!username || !email) {
+      return { success: false, message: 'Username and email must be set in Settings' };
+    }
+
+    try {
+      const { execSync } = require('child_process');
+
+      // Remove backup refs from any previous filter-branch run
+      const backupDir = path.join(repoPath, '.git', 'refs', 'original');
+      if (fs.existsSync(backupDir)) {
+        fs.rmSync(backupDir, { recursive: true, force: true });
+      }
+
+      const envFilter = `
+if [ "$GIT_AUTHOR_EMAIL" = "${forkEmail}" ]; then
+    GIT_AUTHOR_NAME="${username}"
+    GIT_AUTHOR_EMAIL="${email}"
+fi
+if [ "$GIT_COMMITTER_EMAIL" = "${forkEmail}" ]; then
+    GIT_COMMITTER_NAME="${username}"
+    GIT_COMMITTER_EMAIL="${email}"
+fi
+export GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL
+export GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL
+`;
+
+      execSync(
+        `git filter-branch -f --env-filter '${envFilter.replace(/'/g, "'\\''")}' --tag-name-filter cat -- --branches --tags`,
+        { cwd: repoPath, stdio: 'pipe', timeout: 300000 }
+      );
+
+      return { success: true };
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  },
+);

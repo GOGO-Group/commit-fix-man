@@ -126,6 +126,7 @@
                 >
                   Save
                 </button>
+                <button class="btn btn-secondary btn-xs" id="forkBtn" disabled>Fork</button>
                 <button
                   class="btn btn-secondary btn-xs"
                   id="clearSelectedBtn"
@@ -273,6 +274,28 @@
       </div>
     </div>
 
+    <!-- Fork Modal -->
+    <div class="modal-overlay" id="forkModalOverlay">
+      <div class="modal modal-sm">
+        <div class="modal-header">
+          <h2>Fork: Rewrite Author</h2>
+          <button class="modal-close" id="forkModalClose">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="clear-modal-desc">Replace commits from another author with your settings username and email.</p>
+          <div class="settings-form">
+            <div class="settings-field">
+              <label for="forkEmail">Source email to replace</label>
+              <input type="email" id="forkEmail" class="input" placeholder="original-author@example.com">
+            </div>
+            <div class="settings-actions">
+              <button class="btn btn-primary btn-sm" id="forkOkBtn">Run</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Progress Modal -->
     <div class="modal-overlay" id="progressModalOverlay">
       <div class="modal modal-sm">
@@ -280,14 +303,20 @@
           <h2 id="progressModalTitle">Committing...</h2>
         </div>
         <div class="modal-body">
-          <div class="progress-info">
-            <span id="progressRepo"></span>
-            <span id="progressCount">0 / 0</span>
+          <div id="progressBarSection">
+            <div class="progress-info">
+              <span id="progressRepo"></span>
+              <span id="progressCount">0 / 0</span>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+            <p class="progress-date" id="progressDate"></p>
           </div>
-          <div class="progress-bar-track">
-            <div class="progress-bar-fill" id="progressBarFill"></div>
+          <div id="progressSpinnerSection" style="display:none;">
+            <div class="progress-spinner"></div>
+            <p class="progress-spinner-text" id="progressSpinnerText">Processing...</p>
           </div>
-          <p class="progress-date" id="progressDate"></p>
         </div>
       </div>
     </div>
@@ -899,9 +928,10 @@
           clearAllBtn.disabled = true;
         }
 
-        // Random controls
+        // Random controls & fork
         document.getElementById('randomBtn').disabled = !selectedRepo;
         document.getElementById('randomFreqSlider').disabled = !selectedRepo;
+        document.getElementById('forkBtn').disabled = !selectedRepo;
 
         // Update sidebar badges
         renderRepoList();
@@ -910,12 +940,22 @@
       // ======== Progress Modal ========
       const progressModalOverlay = document.getElementById('progressModalOverlay');
 
-      function openProgressModal(title) {
+      function openProgressModal(title, mode = 'bar') {
         document.getElementById('progressModalTitle').textContent = title;
-        document.getElementById('progressRepo').textContent = '';
-        document.getElementById('progressCount').textContent = '0 / 0';
-        document.getElementById('progressBarFill').style.width = '0%';
-        document.getElementById('progressDate').textContent = '';
+        const barSection = document.getElementById('progressBarSection');
+        const spinnerSection = document.getElementById('progressSpinnerSection');
+        if (mode === 'spinner') {
+          barSection.style.display = 'none';
+          spinnerSection.style.display = 'block';
+          document.getElementById('progressSpinnerText').textContent = 'Processing...';
+        } else {
+          barSection.style.display = 'block';
+          spinnerSection.style.display = 'none';
+          document.getElementById('progressRepo').textContent = '';
+          document.getElementById('progressCount').textContent = '0 / 0';
+          document.getElementById('progressBarFill').style.width = '0%';
+          document.getElementById('progressDate').textContent = '';
+        }
         progressModalOverlay.classList.add('open');
       }
 
@@ -1373,10 +1413,58 @@
           closeSettingsModal();
         });
 
+      // ======== Fork Modal ========
+      const forkModalOverlay = document.getElementById('forkModalOverlay');
+
+      document.getElementById('forkBtn').addEventListener('click', () => {
+        if (!selectedRepo) return;
+        if (!settings.username || !settings.email) {
+          alert('Please set username and email in Settings first.');
+          return;
+        }
+        document.getElementById('forkEmail').value = '';
+        forkModalOverlay.classList.add('open');
+      });
+
+      document.getElementById('forkModalClose').addEventListener('click', () => {
+        forkModalOverlay.classList.remove('open');
+      });
+      forkModalOverlay.addEventListener('click', (e) => {
+        if (e.target === forkModalOverlay) forkModalOverlay.classList.remove('open');
+      });
+
+      document.getElementById('forkOkBtn').addEventListener('click', async () => {
+        const forkEmail = document.getElementById('forkEmail').value.trim();
+        if (!forkEmail) {
+          alert('Please enter the source email to replace.');
+          return;
+        }
+        forkModalOverlay.classList.remove('open');
+        openProgressModal(`Forking: ${selectedRepo}`, 'spinner');
+
+        const result = await window.api.forkRepo({
+          repoName: selectedRepo,
+          forkEmail,
+          username: settings.username,
+          email: settings.email,
+        });
+
+        closeProgressModal();
+
+        if (result.success) {
+          await loadAllCommits();
+          renderCalendars();
+        } else {
+          alert('Fork failed: ' + result.message);
+        }
+      });
+
       // ======== Keyboard ========
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-          if (settingsModalOverlay.classList.contains("open")) {
+          if (forkModalOverlay.classList.contains("open")) {
+            forkModalOverlay.classList.remove("open");
+          } else if (settingsModalOverlay.classList.contains("open")) {
             closeSettingsModal();
           } else if (clearModalOverlay.classList.contains("open")) {
             closeClearModal();

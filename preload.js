@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld('api', {
   getAllPlansSummary: () => ipcRenderer.invoke('get-all-plans-summary'),
   clearPlanRepo: (data) => ipcRenderer.invoke('clear-plan-repo', data),
   clearPlanAll: (data) => ipcRenderer.invoke('clear-plan-all', data),
+  forkRepo: (data) => ipcRenderer.invoke('fork-repo', data),
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (data) => ipcRenderer.invoke('save-settings', data),
   onCommitProgress: (callback) => {
