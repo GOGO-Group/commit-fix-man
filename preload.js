@@ -9,7 +9,7 @@ contextBridge.exposeInMainWorld('api', {
   deleteRepo: (repoName) => ipcRenderer.invoke('delete-repo', repoName),
   listRepos: () => ipcRenderer.invoke('list-repos'),
   getCommitsRaw: (repoName) => ipcRenderer.invoke('get-commits-raw', repoName),
-  makeCommit: (data) => ipcRenderer.invoke('make-commit', data),
+  executePlan: (data) => ipcRenderer.invoke('execute-plan', data),
   toggleFlag: (repoName) => ipcRenderer.invoke('toggle-flag', repoName),
   getCommitPlan: (repoName) => ipcRenderer.invoke('get-commit-plan', repoName),
   setCommitPlan: (data) => ipcRenderer.invoke('set-commit-plan', data),

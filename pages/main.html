@@ -841,22 +841,70 @@
         .getElementById("saveSelectedBtn")
         .addEventListener("click", async () => {
           if (!selectedRepo) return;
-          await window.api.clearPlanRepo({ repoName: selectedRepo });
-          currentPlan = {};
-          allPlans = await window.api.getAllPlans();
-          plansSummary = await window.api.getAllPlansSummary();
-          renderCalendars();
-          updatePlanActions();
+          if (!settings.username || !settings.email) {
+            alert('Please set username and email in Settings first.');
+            return;
+          }
+          const btn = document.getElementById('saveSelectedBtn');
+          btn.disabled = true;
+          btn.textContent = 'Committing...';
+
+          const result = await window.api.executePlan({
+            repoName: selectedRepo,
+            plan: currentPlan,
+            username: settings.username,
+            email: settings.email,
+          });
+
+          if (result.success) {
+            await window.api.clearPlanRepo({ repoName: selectedRepo });
+            currentPlan = {};
+            allPlans = await window.api.getAllPlans();
+            plansSummary = await window.api.getAllPlansSummary();
+            await loadAllCommits();
+            renderCalendars();
+            updatePlanActions();
+          } else {
+            alert('Commit failed: ' + result.message);
+          }
+          btn.textContent = 'Save';
         });
       document
         .getElementById("saveAllBtn")
         .addEventListener("click", async () => {
-          await window.api.clearPlanAll({});
+          if (!settings.username || !settings.email) {
+            alert('Please set username and email in Settings first.');
+            return;
+          }
+          const btn = document.getElementById('saveAllBtn');
+          btn.disabled = true;
+          btn.textContent = 'Committing...';
+
+          let failed = false;
+          for (const [repoName, dates] of Object.entries(allPlans)) {
+            const result = await window.api.executePlan({
+              repoName,
+              plan: dates,
+              username: settings.username,
+              email: settings.email,
+            });
+            if (!result.success) {
+              alert(`Commit failed for ${repoName}: ${result.message}`);
+              failed = true;
+              break;
+            }
+          }
+
+          if (!failed) {
+            await window.api.clearPlanAll({});
+          }
           currentPlan = {};
-          allPlans = {};
-          plansSummary = {};
+          allPlans = await window.api.getAllPlans();
+          plansSummary = await window.api.getAllPlansSummary();
+          await loadAllCommits();
           renderCalendars();
           updatePlanActions();
+          btn.textContent = 'Save All';
         });
 
       // ======== Clear Modal ========

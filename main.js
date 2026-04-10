@@ -317,35 +317,55 @@ ipcMain.handle("save-settings", async (event, settings) => {
   saveSettings(settings);
 });
 
-// Make a commit to a repository with given username, email, and date
+// Execute commit plan for a repository: create commits for each date/count entry
 ipcMain.handle(
-  "make-commit",
-  async (event, { repoName, username, email, commitDate, message }) => {
+  'execute-plan',
+  async (event, { repoName, plan, username, email }) => {
     const repoPath = path.join(REPO_DIR, repoName);
     if (!fs.existsSync(repoPath)) {
-      return { success: false, message: "Repository not found" };
+      return { success: false, message: 'Repository not found' };
+    }
+    if (!username || !email) {
+      return { success: false, message: 'Username and email must be set in Settings' };
     }
 
     try {
-      const git = simpleGit(repoPath);
+      const dummyFile = path.join(repoPath, '.commit-log');
+      let totalCommits = 0;
 
-      await git.addConfig("user.name", username);
-      await git.addConfig("user.email", email);
+      // plan is { "YYYY-MM-DD": count, ... }
+      const entries = Object.entries(plan).sort((a, b) => a[0].localeCompare(b[0]));
 
-      const commitFile = path.join(repoPath, ".commit-log");
-      const timestamp = new Date(commitDate).toISOString();
-      fs.appendFileSync(commitFile, `Commit at ${timestamp} by ${username}\n`);
+      for (const [date, count] of entries) {
+        for (let i = 0; i < count; i++) {
+          // Generate random time HH:MM:SS
+          const hours = String(Math.floor(Math.random() * 24)).padStart(2, '0');
+          const minutes = String(Math.floor(Math.random() * 60)).padStart(2, '0');
+          const seconds = String(Math.floor(Math.random() * 60)).padStart(2, '0');
+          const commitTime = `${date}T${hours}:${minutes}:${seconds}`;
 
-      await git.add(".commit-log");
+          // Append to dummy file
+          fs.appendFileSync(dummyFile, ' ');
 
-      const commitMsg = message || `Commit by ${username} at ${timestamp}`;
-      await git.commit(commitMsg, {
-        "--date": commitDate,
-      });
+          // Stage and commit using raw git with env vars
+          const git = simpleGit(repoPath);
+          await git.add('.commit-log');
 
-      await git.env("GIT_COMMITTER_DATE", commitDate);
+          const commitMsg = `Edit commit for ${date} (${i + 1}/${count})`;
+          await git
+            .env('GIT_AUTHOR_DATE', commitTime)
+            .env('GIT_COMMITTER_DATE', commitTime)
+            .env('GIT_AUTHOR_NAME', username)
+            .env('GIT_AUTHOR_EMAIL', email)
+            .env('GIT_COMMITTER_NAME', username)
+            .env('GIT_COMMITTER_EMAIL', email)
+            .commit(commitMsg);
 
-      return { success: true };
+          totalCommits++;
+        }
+      }
+
+      return { success: true, totalCommits };
     } catch (err) {
       return { success: false, message: err.message };
     }
