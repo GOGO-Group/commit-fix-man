@@ -1,525 +1,707 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Commit Maker - Dashboard</title>
-  <link rel="stylesheet" href="../styles/app.css">
-</head>
-<body class="main-page">
-  <div class="layout">
-    <!-- Left Sidebar: Repository List -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <h2>Repositories</h2>
-        <div class="sidebar-actions">
-          <button class="icon-btn" id="refreshBtn" title="Refresh commit history">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M8 3a5 5 0 0 0-4.546 2.914.5.5 0 1 1-.908-.418A6 6 0 1 1 2.25 9.665a.5.5 0 0 1 .959.287A5 5 0 1 0 8 3z"/>
-              <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-            </svg>
-          </button>
-          <button class="icon-btn" id="settingsBtn" title="Settings">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <path fill-rule="evenodd" d="M7.429 1.525a6.593 6.593 0 0 1 1.142 0c.036.003.108.036.137.146l.289 1.105c.147.56.55.967.997 1.189.174.086.341.183.501.29.417.278.97.423 1.53.27l1.102-.303c.11-.03.175.016.195.046.219.31.41.641.573.989.014.031.022.11-.059.19l-.815.806c-.411.406-.562.957-.53 1.456a4.588 4.588 0 0 1 0 .582c-.032.499.119 1.05.53 1.456l.815.806c.08.08.073.159.059.19a6.494 6.494 0 0 1-.573.989c-.02.03-.085.076-.195.046l-1.102-.303c-.56-.153-1.113-.008-1.53.27a4.506 4.506 0 0 1-.501.29c-.447.222-.85.629-.997 1.189l-.289 1.105c-.029.11-.101.143-.137.146a6.613 6.613 0 0 1-1.142 0c-.036-.003-.108-.037-.137-.146l-.289-1.105c-.147-.56-.55-.967-.997-1.189a4.502 4.502 0 0 1-.501-.29c-.417-.278-.97-.423-1.53-.27l-1.102.303c-.11.03-.175-.016-.195-.046a6.492 6.492 0 0 1-.573-.989c-.014-.031-.022-.11.059-.19l.815-.806c.411-.406.562-.957.53-1.456a4.587 4.587 0 0 1 0-.582c.032-.499-.119-1.05-.53-1.456l-.815-.806c-.08-.08-.073-.159-.059-.19a6.44 6.44 0 0 1 .573-.989c.02-.03.085-.076.195-.046l1.102.303c.56.153 1.113.008 1.53-.27.16-.107.327-.204.501-.29.447-.222.85-.629.997-1.189l.289-1.105c.029-.11.101-.143.137-.146zM8 0c-.236 0-.47.01-.701.03-.743.065-1.29.615-1.458 1.261l-.29 1.106c-.017.066-.078.158-.211.224a5.994 5.994 0 0 0-.668.386c-.123.082-.233.09-.3.071L3.27 2.776c-.644-.177-1.392.02-1.82.63a7.977 7.977 0 0 0-.704 1.217c-.315.675-.111 1.422.363 1.891l.815.806c.05.048.098.147.088.294a6.084 6.084 0 0 0 0 .772c.01.147-.038.246-.088.294l-.815.806c-.474.469-.678 1.216-.363 1.891.2.428.436.835.704 1.218.428.609 1.176.806 1.82.63l1.103-.303c.066-.019.176-.011.299.071.213.143.436.272.668.386.133.066.194.158.212.224l.289 1.106c.169.646.715 1.196 1.458 1.26a8.094 8.094 0 0 0 1.402 0c.743-.064 1.29-.614 1.458-1.26l.29-1.106c.017-.066.078-.158.211-.224a5.98 5.98 0 0 0 .668-.386c.123-.082.233-.09.3-.071l1.102.302c.644.177 1.392-.02 1.82-.63.268-.382.505-.789.704-1.217.315-.675.111-1.422-.364-1.891l-.814-.806c-.05-.048-.098-.147-.088-.294a6.1 6.1 0 0 0 0-.772c-.01-.147.039-.246.088-.294l.814-.806c.475-.469.679-1.216.364-1.891a7.992 7.992 0 0 0-.704-1.218c-.428-.609-1.176-.806-1.82-.63l-1.103.303c-.066.019-.176.011-.299-.071a5.991 5.991 0 0 0-.668-.386c-.133-.066-.194-.158-.212-.224L10.16 1.29C9.99.645 9.444.095 8.701.031A8.094 8.094 0 0 0 8 0zm1.5 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-            </svg>
-            <span class="settings-dot" id="settingsDot"></span>
-          </button>
-          <button class="icon-btn" id="manageBtn" title="Manage repositories">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0z"/>
-              <path d="M8 4a.75.75 0 0 1 .75.75v2.5h2.5a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-1.5 0v-2.5h-2.5a.75.75 0 0 1 0-1.5h2.5v-2.5A.75.75 0 0 1 8 4z"/>
-            </svg>
-          </button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Commit Maker - Dashboard</title>
+    <link rel="stylesheet" href="../styles/app.css" />
+  </head>
+  <body class="main-page">
+    <div class="layout">
+      <!-- Left Sidebar: Repository List -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <h2>Repositories</h2>
+          <div class="sidebar-actions">
+            <button
+              class="icon-btn"
+              id="refreshBtn"
+              title="Refresh commit history"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+              >
+                <path
+                  d="M8 3a5 5 0 0 0-4.546 2.914.5.5 0 1 1-.908-.418A6 6 0 1 1 2.25 9.665a.5.5 0 0 1 .959.287A5 5 0 1 0 8 3z"
+                />
+                <path
+                  d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"
+                />
+              </svg>
+            </button>
+            <button class="icon-btn" id="settingsBtn" title="Settings">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M7.429 1.525a6.593 6.593 0 0 1 1.142 0c.036.003.108.036.137.146l.289 1.105c.147.56.55.967.997 1.189.174.086.341.183.501.29.417.278.97.423 1.53.27l1.102-.303c.11-.03.175.016.195.046.219.31.41.641.573.989.014.031.022.11-.059.19l-.815.806c-.411.406-.562.957-.53 1.456a4.588 4.588 0 0 1 0 .582c-.032.499.119 1.05.53 1.456l.815.806c.08.08.073.159.059.19a6.494 6.494 0 0 1-.573.989c-.02.03-.085.076-.195.046l-1.102-.303c-.56-.153-1.113-.008-1.53.27a4.506 4.506 0 0 1-.501.29c-.447.222-.85.629-.997 1.189l-.289 1.105c-.029.11-.101.143-.137.146a6.613 6.613 0 0 1-1.142 0c-.036-.003-.108-.037-.137-.146l-.289-1.105c-.147-.56-.55-.967-.997-1.189a4.502 4.502 0 0 1-.501-.29c-.417-.278-.97-.423-1.53-.27l-1.102.303c-.11.03-.175-.016-.195-.046a6.492 6.492 0 0 1-.573-.989c-.014-.031-.022-.11.059-.19l.815-.806c.411-.406.562-.957.53-1.456a4.587 4.587 0 0 1 0-.582c.032-.499-.119-1.05-.53-1.456l-.815-.806c-.08-.08-.073-.159-.059-.19a6.44 6.44 0 0 1 .573-.989c.02-.03.085-.076.195-.046l1.102.303c.56.153 1.113.008 1.53-.27.16-.107.327-.204.501-.29.447-.222.85-.629.997-1.189l.289-1.105c.029-.11.101-.143.137-.146zM8 0c-.236 0-.47.01-.701.03-.743.065-1.29.615-1.458 1.261l-.29 1.106c-.017.066-.078.158-.211.224a5.994 5.994 0 0 0-.668.386c-.123.082-.233.09-.3.071L3.27 2.776c-.644-.177-1.392.02-1.82.63a7.977 7.977 0 0 0-.704 1.217c-.315.675-.111 1.422.363 1.891l.815.806c.05.048.098.147.088.294a6.084 6.084 0 0 0 0 .772c.01.147-.038.246-.088.294l-.815.806c-.474.469-.678 1.216-.363 1.891.2.428.436.835.704 1.218.428.609 1.176.806 1.82.63l1.103-.303c.066-.019.176-.011.299.071.213.143.436.272.668.386.133.066.194.158.212.224l.289 1.106c.169.646.715 1.196 1.458 1.26a8.094 8.094 0 0 0 1.402 0c.743-.064 1.29-.614 1.458-1.26l.29-1.106c.017-.066.078-.158.211-.224a5.98 5.98 0 0 0 .668-.386c.123-.082.233-.09.3-.071l1.102.302c.644.177 1.392-.02 1.82-.63.268-.382.505-.789.704-1.217.315-.675.111-1.422-.364-1.891l-.814-.806c-.05-.048-.098-.147-.088-.294a6.1 6.1 0 0 0 0-.772c-.01-.147.039-.246.088-.294l.814-.806c.475-.469.679-1.216.364-1.891a7.992 7.992 0 0 0-.704-1.218c-.428-.609-1.176-.806-1.82-.63l-1.103.303c-.066.019-.176.011-.299-.071a5.991 5.991 0 0 0-.668-.386c-.133-.066-.194-.158-.212-.224L10.16 1.29C9.99.645 9.444.095 8.701.031A8.094 8.094 0 0 0 8 0zm1.5 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"
+                />
+              </svg>
+              <span class="settings-dot" id="settingsDot"></span>
+            </button>
+            <button class="icon-btn" id="manageBtn" title="Manage repositories">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+              >
+                <path
+                  d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0z"
+                />
+                <path
+                  d="M8 4a.75.75 0 0 1 .75.75v2.5h2.5a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-1.5 0v-2.5h-2.5a.75.75 0 0 1 0-1.5h2.5v-2.5A.75.75 0 0 1 8 4z"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
-      </div>
-      <ul id="repoList" class="repo-sidebar-list"></ul>
-    </aside>
+        <ul id="repoList" class="repo-sidebar-list"></ul>
+      </aside>
 
-    <!-- Splitter -->
-    <div class="splitter" id="splitter"></div>
+      <!-- Splitter -->
+      <div class="splitter" id="splitter"></div>
 
-    <!-- Main Content -->
-    <main class="content" id="mainContent">
-      <!-- Year buttons (top) -->
-      <div class="year-buttons" id="yearButtonsTop"></div>
+      <!-- Main Content -->
+      <main class="content" id="mainContent">
+        <!-- Year buttons (top) -->
+        <div class="year-buttons" id="yearButtonsTop"></div>
 
-      <!-- Commit Calendars -->
-      <div class="calendars">
-        <div class="calendar-section">
-          <h3>All Repositories</h3>
-          <div class="calendar-wrapper" id="calendarAll"></div>
-          <div class="calendar-footer">
-            <span class="plan-status" id="allPlanStatus">No planned commits</span>
-            <div class="calendar-footer-actions">
-              <button class="btn btn-primary btn-xs" id="saveAllBtn" disabled>Save All</button>
-              <button class="btn btn-secondary btn-xs" id="clearAllBtn" disabled>Clear</button>
+        <!-- Commit Calendars -->
+        <div class="calendars">
+          <div class="calendar-section">
+            <h3>All Repositories</h3>
+            <div class="calendar-wrapper" id="calendarAll"></div>
+            <div class="calendar-footer">
+              <span class="plan-status" id="allPlanStatus"
+                >No planned commits</span
+              >
+              <div class="calendar-footer-actions">
+                <button class="btn btn-primary btn-xs" id="saveAllBtn" disabled>
+                  Save All
+                </button>
+                <button
+                  class="btn btn-secondary btn-xs"
+                  id="clearAllBtn"
+                  disabled
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="calendar-section">
+            <h3 id="selectedCalendarTitle">Selected Repository (none)</h3>
+            <div class="calendar-wrapper" id="calendarSelected"></div>
+            <div class="calendar-footer">
+              <span class="plan-status" id="selectedPlanStatus"
+                >No planned commits</span
+              >
+              <div class="calendar-footer-actions">
+                <button
+                  class="btn btn-primary btn-xs"
+                  id="saveSelectedBtn"
+                  disabled
+                >
+                  Save
+                </button>
+                <button
+                  class="btn btn-secondary btn-xs"
+                  id="clearSelectedBtn"
+                  disabled
+                >
+                  Clear
+                </button>
+              </div>
             </div>
           </div>
         </div>
-        <div class="calendar-section">
-          <h3 id="selectedCalendarTitle">Selected Repository (none)</h3>
-          <div class="calendar-wrapper" id="calendarSelected"></div>
-          <div class="calendar-footer">
-            <span class="plan-status" id="selectedPlanStatus">No planned commits</span>
-            <div class="calendar-footer-actions">
-              <button class="btn btn-primary btn-xs" id="saveSelectedBtn" disabled>Save</button>
-              <button class="btn btn-secondary btn-xs" id="clearSelectedBtn" disabled>Clear</button>
-            </div>
-          </div>
+
+        <!-- Year buttons (bottom) -->
+        <div class="year-buttons" id="yearButtonsBottom"></div>
+      </main>
+    </div>
+
+    <!-- Tooltip -->
+    <div class="tooltip" id="tooltip"></div>
+
+    <!-- Repository Manage Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Manage Repositories</h2>
+          <button class="modal-close" id="modalClose">&times;</button>
         </div>
-      </div>
-
-      <!-- Year buttons (bottom) -->
-      <div class="year-buttons" id="yearButtonsBottom"></div>
-    </main>
-  </div>
-
-  <!-- Tooltip -->
-  <div class="tooltip" id="tooltip"></div>
-
-  <!-- Repository Manage Modal -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Manage Repositories</h2>
-        <button class="modal-close" id="modalClose">&times;</button>
-      </div>
-      <div class="modal-body">
-        <!-- Add repo section -->
-        <div class="modal-section">
-          <h3>Add Repository</h3>
-          <div class="add-repo-row">
-            <input type="text" id="repoUrlInput" class="input" placeholder="Repository URL (https://... or git@...)">
-            <button class="btn btn-primary btn-sm" id="addUrlBtn">Clone</button>
-          </div>
-          <div class="add-repo-row">
-            <button class="btn btn-secondary btn-sm" id="addLocalBtn">Add Local Directory</button>
-          </div>
-          <div class="add-repo-row">
-            <div class="drop-zone" id="dropZone">
-              <p>Drop a .txt file here with repository URLs</p>
-              <p class="hint">or click to browse</p>
-              <input type="file" id="fileInput" accept=".txt" style="display:none;">
+        <div class="modal-body">
+          <!-- Add repo section -->
+          <div class="modal-section">
+            <h3>Add Repository</h3>
+            <div class="add-repo-row">
+              <input
+                type="text"
+                id="repoUrlInput"
+                class="input"
+                placeholder="Repository URL (https://... or git@...)"
+              />
+              <button class="btn btn-primary btn-sm" id="addUrlBtn">
+                Clone
+              </button>
             </div>
+            <div class="add-repo-row">
+              <button class="btn btn-secondary btn-sm" id="addLocalBtn">
+                Add Local Directory
+              </button>
+            </div>
+            <div class="add-repo-row">
+              <div class="drop-zone" id="dropZone">
+                <p>Drop a .txt file here with repository URLs</p>
+                <p class="hint">or click to browse</p>
+                <input
+                  type="file"
+                  id="fileInput"
+                  accept=".txt"
+                  style="display: none"
+                />
+              </div>
+            </div>
+            <div
+              id="cloneProgress"
+              class="clone-progress"
+              style="display: none"
+            ></div>
           </div>
-          <div id="cloneProgress" class="clone-progress" style="display:none;"></div>
-        </div>
 
-        <!-- Repo table section -->
-        <div class="modal-section">
-          <h3>Repository List</h3>
-          <div class="repo-table-wrapper">
-            <table class="repo-table" id="repoTable">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th class="col-flag">Exclude</th>
-                  <th class="col-actions">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="repoTableBody"></tbody>
-            </table>
-            <p class="empty-msg" id="emptyMsg">No repositories yet. Add one above.</p>
+          <!-- Repo table section -->
+          <div class="modal-section">
+            <h3>Repository List</h3>
+            <div class="repo-table-wrapper">
+              <table class="repo-table" id="repoTable">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th class="col-flag">Exclude</th>
+                    <th class="col-actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="repoTableBody"></tbody>
+              </table>
+              <p class="empty-msg" id="emptyMsg">
+                No repositories yet. Add one above.
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Clear Plan Modal -->
-  <div class="modal-overlay" id="clearModalOverlay">
-    <div class="modal modal-sm">
-      <div class="modal-header">
-        <h2 id="clearModalTitle">Clear Commit Plans</h2>
-        <button class="modal-close" id="clearModalClose">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="clear-modal-desc" id="clearModalDesc"></p>
-        <div class="clear-modal-buttons">
-          <button class="btn btn-secondary" id="clearYearBtn">Clear Year (<span id="clearYearLabel"></span>)</button>
-          <button class="btn btn-danger" id="clearAllConfirmBtn">Clear All</button>
+    <!-- Clear Plan Modal -->
+    <div class="modal-overlay" id="clearModalOverlay">
+      <div class="modal modal-sm">
+        <div class="modal-header">
+          <h2 id="clearModalTitle">Clear Commit Plans</h2>
+          <button class="modal-close" id="clearModalClose">&times;</button>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings Modal -->
-  <div class="modal-overlay" id="settingsModalOverlay">
-    <div class="modal modal-sm">
-      <div class="modal-header">
-        <h2>Settings</h2>
-        <button class="modal-close" id="settingsModalClose">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="settings-form">
-          <div class="settings-field">
-            <label for="settingsUsername">Username</label>
-            <input type="text" id="settingsUsername" class="input" placeholder="Your git username">
-          </div>
-          <div class="settings-field">
-            <label for="settingsEmail">Email</label>
-            <input type="email" id="settingsEmail" class="input" placeholder="your@email.com">
-          </div>
-          <div class="settings-actions">
-            <button class="btn btn-primary btn-sm" id="settingsSaveBtn">Save</button>
+        <div class="modal-body">
+          <p class="clear-modal-desc" id="clearModalDesc"></p>
+          <div class="clear-modal-buttons">
+            <button class="btn btn-secondary" id="clearYearBtn">
+              Clear Year (<span id="clearYearLabel"></span>)
+            </button>
+            <button class="btn btn-danger" id="clearAllConfirmBtn">
+              Clear All
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    // ======== State ========
-    let allCommits = [];
-    let repos = [];            // { name, flagged }
-    let selectedRepo = null;
-    let currentYear = new Date().getFullYear();
-    let isRefreshing = false;
-    let currentPlan = {};      // { "YYYY-MM-DD": count } for selected repo
-    let plansSummary = {};     // { repoName: totalCount } across all repos
-    let clearModalMode = null; // 'selected' or 'all'
-    let settings = { username: '', email: '' };
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModalOverlay">
+      <div class="modal modal-sm">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <button class="modal-close" id="settingsModalClose">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-form">
+            <div class="settings-field">
+              <label for="settingsUsername">Username</label>
+              <input
+                type="text"
+                id="settingsUsername"
+                class="input"
+                placeholder="Your git username"
+              />
+            </div>
+            <div class="settings-field">
+              <label for="settingsEmail">Email</label>
+              <input
+                type="email"
+                id="settingsEmail"
+                class="input"
+                placeholder="your@email.com"
+              />
+            </div>
+            <div class="settings-actions">
+              <button class="btn btn-primary btn-sm" id="settingsSaveBtn">
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    <script>
+      // ======== State ========
+      let allCommits = [];
+      let repos = []; // { name, flagged }
+      let selectedRepo = null;
+      let currentYear = new Date().getFullYear();
+      let isRefreshing = false;
+      let currentPlan = {}; // { "YYYY-MM-DD": count } for selected repo
+      let plansSummary = {}; // { repoName: totalCount } across all repos
+      let allPlans = {}; // { repoName: { date: count } } full plan data
+      let clearModalMode = null; // 'selected' or 'all'
+      let settings = { username: "", email: "" };
 
-    // ======== Tooltip ========
-    const tooltip = document.getElementById('tooltip');
+      const MONTH_LABELS = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-    function showTooltipForCell(cell, html) {
-      tooltip.innerHTML = html;
-      tooltip.style.display = 'block';
+      // ======== Tooltip ========
+      const tooltip = document.getElementById("tooltip");
 
-      const cellRect = cell.getBoundingClientRect();
-      const tipRect = tooltip.getBoundingClientRect();
+      function showTooltipForCell(cell, html) {
+        tooltip.innerHTML = html;
+        tooltip.style.display = "block";
 
-      // Position above the cell, centered horizontally
-      let x = cellRect.left + cellRect.width / 2 - tipRect.width / 2;
-      let y = cellRect.top - tipRect.height - 6;
+        const cellRect = cell.getBoundingClientRect();
+        const tipRect = tooltip.getBoundingClientRect();
 
-      // Clamp to viewport
-      if (x < 4) x = 4;
-      if (x + tipRect.width > window.innerWidth - 4) x = window.innerWidth - tipRect.width - 4;
-      if (y < 4) y = cellRect.bottom + 6; // flip below if no room above
+        // Position above the cell, centered horizontally
+        let x = cellRect.left + cellRect.width / 2 - tipRect.width / 2;
+        let y = cellRect.top - tipRect.height - 6;
 
-      tooltip.style.left = x + 'px';
-      tooltip.style.top = y + 'px';
-    }
+        // Clamp to viewport
+        if (x < 4) x = 4;
+        if (x + tipRect.width > window.innerWidth - 4)
+          x = window.innerWidth - tipRect.width - 4;
+        if (y < 4) y = cellRect.bottom + 6; // flip below if no room above
 
-    function hideTooltip() {
-      tooltip.style.display = 'none';
-    }
-
-    // ======== Init ========
-    async function init() {
-      settings = await window.api.getSettings();
-      updateSettingsDot();
-      await refreshAll();
-      setupSplitter();
-    }
-
-    async function refreshAll() {
-      repos = await window.api.listRepos();
-      renderRepoList();
-      await loadAllCommits();
-      if (selectedRepo) {
-        currentPlan = await window.api.getCommitPlan(selectedRepo);
-      } else {
-        currentPlan = {};
+        tooltip.style.left = x + "px";
+        tooltip.style.top = y + "px";
       }
-      plansSummary = await window.api.getAllPlansSummary();
-      buildYearButtons();
-      renderCalendars();
-      updatePlanActions();
-    }
 
-    // ======== Sidebar Repo List ========
-    function renderRepoList() {
-      const list = document.getElementById('repoList');
-      list.innerHTML = '';
+      function hideTooltip() {
+        tooltip.style.display = "none";
+      }
 
-      repos.forEach((repo) => {
-        const li = document.createElement('li');
-        const planCount = plansSummary[repo.name] || 0;
-        li.innerHTML = `
+      // ======== Init ========
+      async function init() {
+        settings = await window.api.getSettings();
+        updateSettingsDot();
+        await refreshAll();
+        setupSplitter();
+      }
+
+      async function refreshAll() {
+        repos = await window.api.listRepos();
+        renderRepoList();
+        await loadAllCommits();
+        if (selectedRepo) {
+          currentPlan = await window.api.getCommitPlan(selectedRepo);
+        } else {
+          currentPlan = {};
+        }
+        allPlans = await window.api.getAllPlans();
+        plansSummary = await window.api.getAllPlansSummary();
+        buildYearButtons();
+        renderCalendars();
+        updatePlanActions();
+      }
+
+      // ======== Sidebar Repo List ========
+      function renderRepoList() {
+        const list = document.getElementById("repoList");
+        list.innerHTML = "";
+
+        repos.forEach((repo) => {
+          const li = document.createElement("li");
+          const planCount = plansSummary[repo.name] || 0;
+          li.innerHTML = `
           <span class="repo-name">${repo.name}</span>
-          ${repo.flagged ? '<span class="flag-badge" title="Excluded from calendar">excluded</span>' : ''}
-          ${planCount > 0 ? `<span class="repo-plan-badge" title="${planCount} planned commits">${planCount}</span>` : ''}
+          ${repo.flagged ? '<span class="flag-badge" title="Excluded from calendar">excluded</span>' : ""}
+          ${planCount > 0 ? `<span class="repo-plan-badge" title="${planCount} planned commits">${planCount}</span>` : ""}
         `;
-        li.className = repo.name === selectedRepo ? 'active' : '';
-        if (repo.flagged) li.classList.add('flagged');
-        li.addEventListener('click', async () => {
-          selectedRepo = selectedRepo === repo.name ? null : repo.name;
-          if (selectedRepo) {
-            currentPlan = await window.api.getCommitPlan(selectedRepo);
-          } else {
-            currentPlan = {};
-          }
-          renderRepoList();
-          renderCalendars();
-          updatePlanActions();
-        });
-        list.appendChild(li);
-      });
-    }
-
-    // ======== Load Commits ========
-    async function loadAllCommits() {
-      allCommits = [];
-      for (const repo of repos) {
-        const commits = await window.api.getCommitsRaw(repo.name);
-        commits.forEach((c) => {
-          allCommits.push({
-            date: c.date ? c.date.substring(0, 10) : '',
-            repo: repo.name,
-            author: c.author,
-            email: c.email,
-          });
-        });
-      }
-    }
-
-    // ======== Refresh Button ========
-    document.getElementById('refreshBtn').addEventListener('click', async () => {
-      if (isRefreshing) return;
-      isRefreshing = true;
-      const btn = document.getElementById('refreshBtn');
-      btn.classList.add('spinning');
-      await refreshAll();
-      btn.classList.remove('spinning');
-      isRefreshing = false;
-    });
-
-    // ======== Year Buttons ========
-    function buildYearButtons() {
-      const years = new Set();
-      allCommits.forEach((c) => {
-        if (c.date) years.add(parseInt(c.date.substring(0, 4)));
-      });
-      years.add(new Date().getFullYear());
-
-      const sortedYears = [...years].sort((a, b) => a - b);
-
-      const renderButtons = (containerId) => {
-        const container = document.getElementById(containerId);
-        container.innerHTML = '';
-        sortedYears.forEach((year) => {
-          const btn = document.createElement('button');
-          btn.textContent = year;
-          btn.className = year === currentYear ? 'year-btn active' : 'year-btn';
-          btn.addEventListener('click', () => {
-            currentYear = year;
-            buildYearButtons();
-            renderCalendars();
-          });
-          container.appendChild(btn);
-        });
-      };
-
-      renderButtons('yearButtonsTop');
-      renderButtons('yearButtonsBottom');
-    }
-
-    // ======== Calendar Rendering ========
-    function getDateCountMap(commits, year) {
-      const map = {};
-      commits.forEach((c) => {
-        if (c.date && c.date.startsWith(String(year))) {
-          map[c.date] = (map[c.date] || 0) + 1;
-        }
-      });
-      return map;
-    }
-
-    // Build per-date repo breakdown: { "YYYY-MM-DD": { repoName: count, ... } }
-    function getDateRepoMap(commits, year) {
-      const map = {};
-      commits.forEach((c) => {
-        if (c.date && c.date.startsWith(String(year))) {
-          if (!map[c.date]) map[c.date] = {};
-          map[c.date][c.repo] = (map[c.date][c.repo] || 0) + 1;
-        }
-      });
-      return map;
-    }
-
-    function getIntensityClass(count) {
-      if (count === 0) return 'level-0';
-      if (count <= 2) return 'level-1';
-      if (count <= 5) return 'level-2';
-      if (count <= 10) return 'level-3';
-      return 'level-4';
-    }
-
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
-
-    // Build tooltip HTML for "All" calendar cell
-    function buildAllTooltipHtml(dateStr, repoMap) {
-      const repos = repoMap || {};
-      const totalCount = Object.values(repos).reduce((s, v) => s + v, 0);
-      let html = `<div class="tooltip-date">${dateStr}</div>`;
-      html += `<div class="tooltip-count">${totalCount} commit${totalCount !== 1 ? 's' : ''}</div>`;
-      const entries = Object.entries(repos).sort((a, b) => b[1] - a[1]);
-      if (entries.length > 0) {
-        html += '<div class="tooltip-repos">';
-        entries.forEach(([name, count]) => {
-          html += `<div class="tooltip-repo-row">${escapeHtml(name)}: ${count}</div>`;
-        });
-        html += '</div>';
-      }
-      return html;
-    }
-
-    // Build tooltip HTML for "Selected" calendar cell
-    function buildSelectedTooltipHtml(dateStr, repoCount, planCount) {
-      let html = `<div class="tooltip-date">${dateStr}</div>`;
-      const total = repoCount + planCount;
-      html += `<div class="tooltip-count">${total} commit${total !== 1 ? 's' : ''}</div>`;
-      if (repoCount > 0 || planCount > 0) {
-        html += '<div class="tooltip-repos">';
-        if (repoCount > 0) html += `<div class="tooltip-repo-row">Existing: ${repoCount}</div>`;
-        if (planCount > 0) html += `<div class="tooltip-repo-row">Planned: ${planCount}</div>`;
-        html += '</div>';
-      }
-      return html;
-    }
-
-    function renderCalendar(containerId, dateMap, options = {}) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
-
-      const { clickable, disabled, dateRepoMap, tooltipMode, repoDateMap, planMap } = options;
-
-      const startDate = new Date(currentYear, 0, 1);
-      const startDay = startDate.getDay();
-
-      const calendarEl = document.createElement('div');
-      calendarEl.className = 'calendar-grid';
-      if (disabled) calendarEl.classList.add('calendar-disabled');
-
-      // Month labels row
-      const monthRow = document.createElement('div');
-      monthRow.className = 'calendar-month-row';
-      const emptyLabel = document.createElement('span');
-      emptyLabel.className = 'day-label';
-      emptyLabel.textContent = '';
-      monthRow.appendChild(emptyLabel);
-
-      const monthPositions = [];
-      for (let m = 0; m < 12; m++) {
-        const firstOfMonth = new Date(currentYear, m, 1);
-        const dayOfYear = Math.floor((firstOfMonth - startDate) / 86400000);
-        const weekIndex = Math.floor((dayOfYear + startDay) / 7);
-        monthPositions.push(weekIndex);
-      }
-
-      let currentMonthIdx = 0;
-      for (let w = 0; w < 53; w++) {
-        const span = document.createElement('span');
-        span.className = 'month-label';
-        if (currentMonthIdx < 12 && monthPositions[currentMonthIdx] === w) {
-          span.textContent = MONTH_LABELS[currentMonthIdx];
-          currentMonthIdx++;
-        }
-        monthRow.appendChild(span);
-      }
-      calendarEl.appendChild(monthRow);
-
-      for (let d = 0; d < 7; d++) {
-        const row = document.createElement('div');
-        row.className = 'calendar-row';
-
-        const dayLabel = document.createElement('span');
-        dayLabel.className = 'day-label';
-        dayLabel.textContent = (d % 2 === 1) ? DAY_LABELS[d].substring(0, 3) : '';
-        row.appendChild(dayLabel);
-
-        for (let w = 0; w < 53; w++) {
-          const dayOffset = w * 7 + d - startDay;
-          const cellDate = new Date(currentYear, 0, 1 + dayOffset);
-
-          const cell = document.createElement('div');
-          cell.className = 'calendar-cell';
-
-          if (cellDate.getFullYear() !== currentYear || dayOffset < 0) {
-            cell.classList.add('empty');
-          } else {
-            const dateStr = cellDate.toISOString().substring(0, 10);
-            const count = dateMap[dateStr] || 0;
-            cell.classList.add(getIntensityClass(count));
-            cell.dataset.date = dateStr;
-            cell.dataset.count = count;
-            if (planMap) {
-              cell.dataset.planCount = planMap[dateStr] || 0;
+          li.className = repo.name === selectedRepo ? "active" : "";
+          if (repo.flagged) li.classList.add("flagged");
+          li.addEventListener("click", async () => {
+            selectedRepo = selectedRepo === repo.name ? null : repo.name;
+            if (selectedRepo) {
+              currentPlan = await window.api.getCommitPlan(selectedRepo);
+            } else {
+              currentPlan = {};
             }
+            renderRepoList();
+            renderCalendars();
+            updatePlanActions();
+          });
+          list.appendChild(li);
+        });
+      }
 
-            if (!disabled) {
-              // Tooltip on hover - anchored to cell
-              cell.addEventListener('mouseenter', () => {
-                let html;
-                if (tooltipMode === 'all') {
-                  html = buildAllTooltipHtml(dateStr, dateRepoMap ? dateRepoMap[dateStr] : null);
-                } else {
-                  const rc = repoDateMap ? (repoDateMap[dateStr] || 0) : 0;
-                  const pc = parseInt(cell.dataset.planCount || '0');
-                  html = buildSelectedTooltipHtml(dateStr, rc, pc);
-                }
-                showTooltipForCell(cell, html);
-              });
-              cell.addEventListener('mouseleave', hideTooltip);
+      // ======== Load Commits ========
+      async function loadAllCommits() {
+        allCommits = [];
+        for (const repo of repos) {
+          const commits = await window.api.getCommitsRaw(repo.name);
+          commits.forEach((c) => {
+            allCommits.push({
+              date: c.date ? c.date.substring(0, 10) : "",
+              repo: repo.name,
+              author: c.author,
+              email: c.email,
+            });
+          });
+        }
+      }
 
-              // Click to set commit plan
-              if (clickable) {
-                cell.classList.add('clickable');
-                cell.addEventListener('click', async () => {
-                  let newPlanCount = (parseInt(cell.dataset.planCount || '0')) + 1;
-                  if (newPlanCount > 10) newPlanCount = 0;
+      // ======== Refresh Button ========
+      document
+        .getElementById("refreshBtn")
+        .addEventListener("click", async () => {
+          if (isRefreshing) return;
+          isRefreshing = true;
+          const btn = document.getElementById("refreshBtn");
+          btn.classList.add("spinning");
+          await refreshAll();
+          btn.classList.remove("spinning");
+          isRefreshing = false;
+        });
 
-                  await window.api.setCommitPlan({
-                    repoName: selectedRepo,
-                    date: dateStr,
-                    count: newPlanCount,
-                  });
+      // ======== Year Buttons ========
+      function buildYearButtons() {
+        const years = new Set();
+        allCommits.forEach((c) => {
+          if (c.date) years.add(parseInt(c.date.substring(0, 4)));
+        });
+        years.add(new Date().getFullYear());
 
-                  currentPlan[dateStr] = newPlanCount;
-                  if (newPlanCount === 0) delete currentPlan[dateStr];
+        const sortedYears = [...years].sort((a, b) => a - b);
 
-                  // Update cell in-place
-                  const rc = repoDateMap ? (repoDateMap[dateStr] || 0) : 0;
-                  const mergedCount = rc + newPlanCount;
-                  cell.dataset.planCount = newPlanCount;
-                  cell.dataset.count = mergedCount;
-                  cell.className = 'calendar-cell clickable ' + getIntensityClass(mergedCount);
+        const renderButtons = (containerId) => {
+          const container = document.getElementById(containerId);
+          container.innerHTML = "";
+          sortedYears.forEach((year) => {
+            const btn = document.createElement("button");
+            btn.textContent = year;
+            btn.className =
+              year === currentYear ? "year-btn active" : "year-btn";
+            btn.addEventListener("click", () => {
+              currentYear = year;
+              buildYearButtons();
+              renderCalendars();
+            });
+            container.appendChild(btn);
+          });
+        };
 
-                  // Update tooltip in-place
-                  const html = buildSelectedTooltipHtml(dateStr, rc, newPlanCount);
-                  showTooltipForCell(cell, html);
+        renderButtons("yearButtonsTop");
+        renderButtons("yearButtonsBottom");
+      }
 
-                  // Update plan summary and action buttons
-                  const totalForRepo = Object.values(currentPlan).reduce((s, v) => s + v, 0);
-                  if (totalForRepo > 0) {
-                    plansSummary[selectedRepo] = totalForRepo;
+      // ======== Calendar Rendering ========
+      function getDateCountMap(commits, year) {
+        const map = {};
+        commits.forEach((c) => {
+          if (c.date && c.date.startsWith(String(year))) {
+            map[c.date] = (map[c.date] || 0) + 1;
+          }
+        });
+        return map;
+      }
+
+      // Build per-date repo breakdown: { "YYYY-MM-DD": { repoName: count, ... } }
+      function getDateRepoMap(commits, year) {
+        const map = {};
+        commits.forEach((c) => {
+          if (c.date && c.date.startsWith(String(year))) {
+            if (!map[c.date]) map[c.date] = {};
+            map[c.date][c.repo] = (map[c.date][c.repo] || 0) + 1;
+          }
+        });
+        return map;
+      }
+
+      function getIntensityClass(count) {
+        if (count === 0) return "level-0";
+        if (count <= 2) return "level-1";
+        if (count <= 5) return "level-2";
+        if (count <= 10) return "level-3";
+        return "level-4";
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      // Build tooltip HTML for "All" calendar cell
+      function buildAllTooltipHtml(dateStr, repoMap, planCount) {
+        const repos = repoMap || {};
+        const totalCount =
+          Object.values(repos).reduce((s, v) => s + v, 0) + (planCount || 0);
+        let html = `<div class="tooltip-date">${dateStr}</div>`;
+        html += `<div class="tooltip-count">${totalCount} commit${totalCount !== 1 ? "s" : ""}</div>`;
+        const entries = Object.entries(repos).sort((a, b) => b[1] - a[1]);
+        if (entries.length > 0 || planCount > 0) {
+          html += '<div class="tooltip-repos">';
+          entries.forEach(([name, count]) => {
+            html += `<div class="tooltip-repo-row">${escapeHtml(name)}: ${count}</div>`;
+          });
+          if (planCount > 0) {
+            html += `<div class="tooltip-repo-row" style="color:#58a6ff;">Planned: ${planCount}</div>`;
+          }
+          html += "</div>";
+        }
+        return html;
+      }
+
+      // Build tooltip HTML for "Selected" calendar cell
+      function buildSelectedTooltipHtml(dateStr, repoCount, planCount) {
+        let html = `<div class="tooltip-date">${dateStr}</div>`;
+        const total = repoCount + planCount;
+        html += `<div class="tooltip-count">${total} commit${total !== 1 ? "s" : ""}</div>`;
+        if (repoCount > 0 || planCount > 0) {
+          html += '<div class="tooltip-repos">';
+          if (repoCount > 0)
+            html += `<div class="tooltip-repo-row">Existing: ${repoCount}</div>`;
+          if (planCount > 0)
+            html += `<div class="tooltip-repo-row">Planned: ${planCount}</div>`;
+          html += "</div>";
+        }
+        return html;
+      }
+
+      function renderCalendar(containerId, dateMap, options = {}) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+
+        const {
+          clickable,
+          disabled,
+          dateRepoMap,
+          tooltipMode,
+          repoDateMap,
+          planMap,
+        } = options;
+
+        const startDate = new Date(currentYear, 0, 1);
+        const startDay = startDate.getDay();
+
+        const calendarEl = document.createElement("div");
+        calendarEl.className = "calendar-grid";
+        if (disabled) calendarEl.classList.add("calendar-disabled");
+
+        // Month labels row
+        const monthRow = document.createElement("div");
+        monthRow.className = "calendar-month-row";
+        const emptyLabel = document.createElement("span");
+        emptyLabel.className = "day-label";
+        emptyLabel.textContent = "";
+        monthRow.appendChild(emptyLabel);
+
+        const monthPositions = [];
+        for (let m = 0; m < 12; m++) {
+          const firstOfMonth = new Date(currentYear, m, 1);
+          const dayOfYear = Math.floor((firstOfMonth - startDate) / 86400000);
+          const weekIndex = Math.floor((dayOfYear + startDay) / 7);
+          monthPositions.push(weekIndex);
+        }
+
+        let currentMonthIdx = 0;
+        for (let w = 0; w < 53; w++) {
+          const span = document.createElement("span");
+          span.className = "month-label";
+          if (currentMonthIdx < 12 && monthPositions[currentMonthIdx] === w) {
+            span.textContent = MONTH_LABELS[currentMonthIdx];
+            currentMonthIdx++;
+          }
+          monthRow.appendChild(span);
+        }
+        calendarEl.appendChild(monthRow);
+
+        for (let d = 0; d < 7; d++) {
+          const row = document.createElement("div");
+          row.className = "calendar-row";
+
+          const dayLabel = document.createElement("span");
+          dayLabel.className = "day-label";
+          dayLabel.textContent =
+            d % 2 === 1 ? DAY_LABELS[d].substring(0, 3) : "";
+          row.appendChild(dayLabel);
+
+          for (let w = 0; w < 53; w++) {
+            const dayOffset = w * 7 + d - startDay;
+            const cellDate = new Date(currentYear, 0, 1 + dayOffset);
+
+            const cell = document.createElement("div");
+            cell.className = "calendar-cell";
+
+            if (cellDate.getFullYear() !== currentYear || dayOffset < 0) {
+              cell.classList.add("empty");
+            } else {
+              const dateStr = cellDate.toISOString().substring(0, 10);
+              const count = dateMap[dateStr] || 0;
+              cell.classList.add(getIntensityClass(count));
+              cell.dataset.date = dateStr;
+              cell.dataset.count = count;
+              if (planMap) {
+                cell.dataset.planCount = planMap[dateStr] || 0;
+                if (planMap[dateStr] > 0) cell.classList.add("has-plan");
+              }
+              if (options.allPlanMap) {
+                cell.dataset.planCount = options.allPlanMap[dateStr] || 0;
+                if (options.allPlanMap[dateStr] > 0)
+                  cell.classList.add("has-plan");
+              }
+
+              if (!disabled) {
+                // Tooltip on hover - anchored to cell
+                cell.addEventListener("mouseenter", () => {
+                  let html;
+                  if (tooltipMode === "all") {
+                    const pc = parseInt(cell.dataset.planCount || "0");
+                    html = buildAllTooltipHtml(
+                      dateStr,
+                      dateRepoMap ? dateRepoMap[dateStr] : null,
+                      pc,
+                    );
                   } else {
-                    delete plansSummary[selectedRepo];
+                    const rc = repoDateMap ? repoDateMap[dateStr] || 0 : 0;
+                    const pc = parseInt(cell.dataset.planCount || "0");
+                    html = buildSelectedTooltipHtml(dateStr, rc, pc);
                   }
-                  updatePlanActions();
+                  showTooltipForCell(cell, html);
                 });
+                cell.addEventListener("mouseleave", hideTooltip);
+
+                // Click to set commit plan
+                if (clickable) {
+                  cell.classList.add("clickable");
+                  cell.addEventListener("click", async () => {
+                    let newPlanCount =
+                      parseInt(cell.dataset.planCount || "0") + 1;
+                    if (newPlanCount > 10) newPlanCount = 0;
+
+                    await window.api.setCommitPlan({
+                      repoName: selectedRepo,
+                      date: dateStr,
+                      count: newPlanCount,
+                    });
+
+                    currentPlan[dateStr] = newPlanCount;
+                    if (newPlanCount === 0) delete currentPlan[dateStr];
+
+                    // Keep allPlans in sync
+                    if (!allPlans[selectedRepo]) allPlans[selectedRepo] = {};
+                    if (newPlanCount > 0) {
+                      allPlans[selectedRepo][dateStr] = newPlanCount;
+                    } else {
+                      delete allPlans[selectedRepo][dateStr];
+                      if (Object.keys(allPlans[selectedRepo]).length === 0)
+                        delete allPlans[selectedRepo];
+                    }
+
+                    // Update cell in-place
+                    const rc = repoDateMap ? repoDateMap[dateStr] || 0 : 0;
+                    // For 'all' mode, planCount on cell is the total across all repos
+                    let cellPlanCount;
+                    if (tooltipMode === "all") {
+                      // Recalculate total plan for this date across all repos
+                      cellPlanCount = 0;
+                      for (const [r, dates] of Object.entries(allPlans)) {
+                        cellPlanCount += dates[dateStr] || 0;
+                      }
+                    } else {
+                      cellPlanCount = newPlanCount;
+                    }
+                    const mergedCount = rc + cellPlanCount;
+                    cell.dataset.planCount = cellPlanCount;
+                    cell.dataset.count = mergedCount;
+                    cell.className =
+                      "calendar-cell clickable " +
+                      getIntensityClass(mergedCount);
+                    if (cellPlanCount > 0) cell.classList.add("has-plan");
+
+                    // Update tooltip in-place
+                    let html;
+                    if (tooltipMode === "all") {
+                      html = buildAllTooltipHtml(
+                        dateStr,
+                        dateRepoMap ? dateRepoMap[dateStr] : null,
+                        cellPlanCount,
+                      );
+                    } else {
+                      html = buildSelectedTooltipHtml(
+                        dateStr,
+                        rc,
+                        newPlanCount,
+                      );
+                    }
+                    showTooltipForCell(cell, html);
+
+                    // Update plan summary and action buttons
+                    const totalForRepo = Object.values(currentPlan).reduce(
+                      (s, v) => s + v,
+                      0,
+                    );
+                    if (totalForRepo > 0) {
+                      plansSummary[selectedRepo] = totalForRepo;
+                    } else {
+                      delete plansSummary[selectedRepo];
+                    }
+                    updatePlanActions();
+
+                    // Re-render the other calendar to stay in sync
+                    if (tooltipMode === "all") {
+                      renderSelectedCalendar();
+                    } else {
+                      renderAllCalendar();
+                    }
+                  });
+                }
               }
             }
+            row.appendChild(cell);
           }
-          row.appendChild(cell);
+          calendarEl.appendChild(row);
         }
-        calendarEl.appendChild(row);
-      }
 
-      const legend = document.createElement('div');
-      legend.className = 'calendar-legend';
-      legend.innerHTML = `
+        const legend = document.createElement("div");
+        legend.className = "calendar-legend";
+        legend.innerHTML = `
         <span>Less</span>
         <div class="calendar-cell level-0"></div>
         <div class="calendar-cell level-1"></div>
@@ -528,258 +710,307 @@
         <div class="calendar-cell level-4"></div>
         <span>More</span>
       `;
-      calendarEl.appendChild(legend);
+        calendarEl.appendChild(legend);
 
-      container.appendChild(calendarEl);
-    }
+        container.appendChild(calendarEl);
+      }
 
-    function renderCalendars() {
-      // "All" calendar excludes flagged repos
-      const unflaggedRepos = new Set(repos.filter(r => !r.flagged).map(r => r.name));
-      const unflaggedCommits = allCommits.filter(c => unflaggedRepos.has(c.repo));
-      const allDateMap = getDateCountMap(unflaggedCommits, currentYear);
-      const allDateRepoMap = getDateRepoMap(unflaggedCommits, currentYear);
-      renderCalendar('calendarAll', allDateMap, {
-        tooltipMode: 'all',
-        dateRepoMap: allDateRepoMap,
-      });
-
-      const titleEl = document.getElementById('selectedCalendarTitle');
-      if (selectedRepo) {
-        titleEl.textContent = `Selected: ${selectedRepo}`;
-        // Get actual repo commits
-        const repoCommits = allCommits.filter(c => c.repo === selectedRepo);
-        const repoDateMap = getDateCountMap(repoCommits, currentYear);
-        // Get plan data
-        const planMap = {};
-        for (const [date, count] of Object.entries(currentPlan)) {
-          if (date.startsWith(String(currentYear))) {
-            planMap[date] = count;
+      // Build aggregated plan map across all repos for a year: { "YYYY-MM-DD": totalPlanCount }
+      function buildAllPlanMap(year) {
+        const map = {};
+        const prefix = String(year);
+        for (const [repo, dates] of Object.entries(allPlans)) {
+          for (const [date, count] of Object.entries(dates)) {
+            if (date.startsWith(prefix)) {
+              map[date] = (map[date] || 0) + count;
+            }
           }
         }
-        // Merge: repo commits as base, plan on top
-        const mergedMap = { ...repoDateMap };
-        for (const [date, count] of Object.entries(planMap)) {
-          mergedMap[date] = (mergedMap[date] || 0) + count;
-        }
-        renderCalendar('calendarSelected', mergedMap, {
-          clickable: true,
-          tooltipMode: 'selected',
-          repoDateMap: repoDateMap,
-          planMap: planMap,
-        });
-      } else {
-        titleEl.textContent = 'Selected Repository (none)';
-        renderCalendar('calendarSelected', {}, { disabled: true });
+        return map;
       }
-    }
 
-    // ======== Plan Action Buttons ========
-    function updatePlanActions() {
-      // Selected repo
-      const selectedStatus = document.getElementById('selectedPlanStatus');
-      const saveSelectedBtn = document.getElementById('saveSelectedBtn');
-      const clearSelectedBtn = document.getElementById('clearSelectedBtn');
-      if (selectedRepo) {
-        const total = Object.values(currentPlan).reduce((s, v) => s + v, 0);
-        if (total > 0) {
-          selectedStatus.textContent = `${total} planned commit${total !== 1 ? 's' : ''}`;
-          selectedStatus.classList.add('has-plans');
-          saveSelectedBtn.disabled = false;
-          clearSelectedBtn.disabled = false;
+      function renderAllCalendar() {
+        const unflaggedRepos = new Set(
+          repos.filter((r) => !r.flagged).map((r) => r.name),
+        );
+        const unflaggedCommits = allCommits.filter((c) =>
+          unflaggedRepos.has(c.repo),
+        );
+        const allDateMap = getDateCountMap(unflaggedCommits, currentYear);
+        const allDateRepoMap = getDateRepoMap(unflaggedCommits, currentYear);
+        const allPlanMap = buildAllPlanMap(currentYear);
+        const mergedAllDateMap = { ...allDateMap };
+        for (const [date, count] of Object.entries(allPlanMap)) {
+          mergedAllDateMap[date] = (mergedAllDateMap[date] || 0) + count;
+        }
+        renderCalendar("calendarAll", mergedAllDateMap, {
+          tooltipMode: "all",
+          dateRepoMap: allDateRepoMap,
+          allPlanMap: allPlanMap,
+          clickable: !!selectedRepo,
+          repoDateMap: allDateMap,
+        });
+      }
+
+      function renderSelectedCalendar() {
+        const titleEl = document.getElementById("selectedCalendarTitle");
+        if (selectedRepo) {
+          titleEl.textContent = `Selected: ${selectedRepo}`;
+          const repoCommits = allCommits.filter((c) => c.repo === selectedRepo);
+          const repoDateMap = getDateCountMap(repoCommits, currentYear);
+          const planMap = {};
+          for (const [date, count] of Object.entries(currentPlan)) {
+            if (date.startsWith(String(currentYear))) {
+              planMap[date] = count;
+            }
+          }
+          const mergedMap = { ...repoDateMap };
+          for (const [date, count] of Object.entries(planMap)) {
+            mergedMap[date] = (mergedMap[date] || 0) + count;
+          }
+          renderCalendar("calendarSelected", mergedMap, {
+            clickable: true,
+            tooltipMode: "selected",
+            repoDateMap: repoDateMap,
+            planMap: planMap,
+          });
         } else {
-          selectedStatus.textContent = 'No planned commits';
-          selectedStatus.classList.remove('has-plans');
+          titleEl.textContent = "Selected Repository (none)";
+          renderCalendar("calendarSelected", {}, { disabled: true });
+        }
+      }
+
+      function renderCalendars() {
+        renderAllCalendar();
+        renderSelectedCalendar();
+      }
+
+      // ======== Plan Action Buttons ========
+      function updatePlanActions() {
+        // Selected repo
+        const selectedStatus = document.getElementById("selectedPlanStatus");
+        const saveSelectedBtn = document.getElementById("saveSelectedBtn");
+        const clearSelectedBtn = document.getElementById("clearSelectedBtn");
+        if (selectedRepo) {
+          const total = Object.values(currentPlan).reduce((s, v) => s + v, 0);
+          if (total > 0) {
+            selectedStatus.textContent = `${total} planned commit${total !== 1 ? "s" : ""}`;
+            selectedStatus.classList.add("has-plans");
+            saveSelectedBtn.disabled = false;
+            clearSelectedBtn.disabled = false;
+          } else {
+            selectedStatus.textContent = "No planned commits";
+            selectedStatus.classList.remove("has-plans");
+            saveSelectedBtn.disabled = true;
+            clearSelectedBtn.disabled = true;
+          }
+        } else {
+          selectedStatus.textContent = "Select a repository";
+          selectedStatus.classList.remove("has-plans");
           saveSelectedBtn.disabled = true;
           clearSelectedBtn.disabled = true;
         }
-      } else {
-        selectedStatus.textContent = 'Select a repository';
-        selectedStatus.classList.remove('has-plans');
-        saveSelectedBtn.disabled = true;
-        clearSelectedBtn.disabled = true;
-      }
 
-      // All repos
-      const allStatus = document.getElementById('allPlanStatus');
-      const saveAllBtn = document.getElementById('saveAllBtn');
-      const clearAllBtn = document.getElementById('clearAllBtn');
-      const grandTotal = Object.values(plansSummary).reduce((s, v) => s + v, 0);
-      if (grandTotal > 0) {
-        const repoCount = Object.keys(plansSummary).length;
-        allStatus.textContent = `${grandTotal} planned commit${grandTotal !== 1 ? 's' : ''} across ${repoCount} repo${repoCount !== 1 ? 's' : ''}`;
-        allStatus.classList.add('has-plans');
-        saveAllBtn.disabled = false;
-        clearAllBtn.disabled = false;
-      } else {
-        allStatus.textContent = 'No planned commits';
-        allStatus.classList.remove('has-plans');
-        saveAllBtn.disabled = true;
-        clearAllBtn.disabled = true;
-      }
-
-      // Update sidebar badges
-      renderRepoList();
-    }
-
-    // Save buttons - clear stored commit data after save
-    document.getElementById('saveSelectedBtn').addEventListener('click', async () => {
-      if (!selectedRepo) return;
-      await window.api.clearPlanRepo({ repoName: selectedRepo });
-      currentPlan = {};
-      plansSummary = await window.api.getAllPlansSummary();
-      renderCalendars();
-      updatePlanActions();
-    });
-    document.getElementById('saveAllBtn').addEventListener('click', async () => {
-      await window.api.clearPlanAll({});
-      currentPlan = {};
-      plansSummary = {};
-      renderCalendars();
-      updatePlanActions();
-    });
-
-    // ======== Clear Modal ========
-    const clearModalOverlay = document.getElementById('clearModalOverlay');
-
-    function openClearModal(mode) {
-      clearModalMode = mode;
-      const titleEl = document.getElementById('clearModalTitle');
-      const descEl = document.getElementById('clearModalDesc');
-      const yearLabel = document.getElementById('clearYearLabel');
-
-      if (mode === 'selected') {
-        titleEl.textContent = `Clear Plans: ${selectedRepo}`;
-        descEl.textContent = `Remove stored commit counts for "${selectedRepo}".`;
-      } else {
-        titleEl.textContent = 'Clear Plans: All Repositories';
-        descEl.textContent = 'Remove stored commit counts for all repositories.';
-      }
-
-      yearLabel.textContent = currentYear;
-      clearModalOverlay.classList.add('open');
-    }
-
-    function closeClearModal() {
-      clearModalOverlay.classList.remove('open');
-      clearModalMode = null;
-    }
-
-    document.getElementById('clearSelectedBtn').addEventListener('click', () => {
-      openClearModal('selected');
-    });
-    document.getElementById('clearAllBtn').addEventListener('click', () => {
-      openClearModal('all');
-    });
-    document.getElementById('clearModalClose').addEventListener('click', closeClearModal);
-    clearModalOverlay.addEventListener('click', (e) => {
-      if (e.target === clearModalOverlay) closeClearModal();
-    });
-
-    document.getElementById('clearYearBtn').addEventListener('click', async () => {
-      const year = currentYear;
-      if (clearModalMode === 'selected') {
-        await window.api.clearPlanRepo({ repoName: selectedRepo, year });
-        currentPlan = await window.api.getCommitPlan(selectedRepo);
-      } else {
-        await window.api.clearPlanAll({ year });
-        if (selectedRepo) {
-          currentPlan = await window.api.getCommitPlan(selectedRepo);
-        }
-      }
-      plansSummary = await window.api.getAllPlansSummary();
-      renderCalendars();
-      updatePlanActions();
-      closeClearModal();
-    });
-
-    document.getElementById('clearAllConfirmBtn').addEventListener('click', async () => {
-      if (clearModalMode === 'selected') {
-        await window.api.clearPlanRepo({ repoName: selectedRepo });
-        currentPlan = await window.api.getCommitPlan(selectedRepo);
-      } else {
-        await window.api.clearPlanAll({});
-        if (selectedRepo) {
-          currentPlan = await window.api.getCommitPlan(selectedRepo);
+        // All repos
+        const allStatus = document.getElementById("allPlanStatus");
+        const saveAllBtn = document.getElementById("saveAllBtn");
+        const clearAllBtn = document.getElementById("clearAllBtn");
+        const grandTotal = Object.values(plansSummary).reduce(
+          (s, v) => s + v,
+          0,
+        );
+        if (grandTotal > 0) {
+          const repoCount = Object.keys(plansSummary).length;
+          allStatus.textContent = `${grandTotal} planned commit${grandTotal !== 1 ? "s" : ""} across ${repoCount} repo${repoCount !== 1 ? "s" : ""}`;
+          allStatus.classList.add("has-plans");
+          saveAllBtn.disabled = false;
+          clearAllBtn.disabled = false;
         } else {
+          allStatus.textContent = "No planned commits";
+          allStatus.classList.remove("has-plans");
+          saveAllBtn.disabled = true;
+          clearAllBtn.disabled = true;
+        }
+
+        // Update sidebar badges
+        renderRepoList();
+      }
+
+      // Save buttons - clear stored commit data after save
+      document
+        .getElementById("saveSelectedBtn")
+        .addEventListener("click", async () => {
+          if (!selectedRepo) return;
+          await window.api.clearPlanRepo({ repoName: selectedRepo });
           currentPlan = {};
+          allPlans = await window.api.getAllPlans();
+          plansSummary = await window.api.getAllPlansSummary();
+          renderCalendars();
+          updatePlanActions();
+        });
+      document
+        .getElementById("saveAllBtn")
+        .addEventListener("click", async () => {
+          await window.api.clearPlanAll({});
+          currentPlan = {};
+          allPlans = {};
+          plansSummary = {};
+          renderCalendars();
+          updatePlanActions();
+        });
+
+      // ======== Clear Modal ========
+      const clearModalOverlay = document.getElementById("clearModalOverlay");
+
+      function openClearModal(mode) {
+        clearModalMode = mode;
+        const titleEl = document.getElementById("clearModalTitle");
+        const descEl = document.getElementById("clearModalDesc");
+        const yearLabel = document.getElementById("clearYearLabel");
+
+        if (mode === "selected") {
+          titleEl.textContent = `Clear Plans: ${selectedRepo}`;
+          descEl.textContent = `Remove stored commit counts for "${selectedRepo}".`;
+        } else {
+          titleEl.textContent = "Clear Plans: All Repositories";
+          descEl.textContent =
+            "Remove stored commit counts for all repositories.";
         }
+
+        yearLabel.textContent = currentYear;
+        clearModalOverlay.classList.add("open");
       }
-      plansSummary = await window.api.getAllPlansSummary();
-      renderCalendars();
-      updatePlanActions();
-      closeClearModal();
-    });
 
-    // ======== Splitter ========
-    function setupSplitter() {
-      const splitter = document.getElementById('splitter');
-      const sidebar = document.getElementById('sidebar');
-      let isResizing = false;
+      function closeClearModal() {
+        clearModalOverlay.classList.remove("open");
+        clearModalMode = null;
+      }
 
-      splitter.addEventListener('mousedown', (e) => {
-        isResizing = true;
-        document.body.style.cursor = 'col-resize';
-        document.body.style.userSelect = 'none';
-        e.preventDefault();
+      document
+        .getElementById("clearSelectedBtn")
+        .addEventListener("click", () => {
+          openClearModal("selected");
+        });
+      document.getElementById("clearAllBtn").addEventListener("click", () => {
+        openClearModal("all");
+      });
+      document
+        .getElementById("clearModalClose")
+        .addEventListener("click", closeClearModal);
+      clearModalOverlay.addEventListener("click", (e) => {
+        if (e.target === clearModalOverlay) closeClearModal();
       });
 
-      document.addEventListener('mousemove', (e) => {
-        if (!isResizing) return;
-        const newWidth = Math.max(120, Math.min(600, e.clientX));
-        sidebar.style.width = newWidth + 'px';
-        sidebar.style.minWidth = newWidth + 'px';
+      document
+        .getElementById("clearYearBtn")
+        .addEventListener("click", async () => {
+          const year = currentYear;
+          if (clearModalMode === "selected") {
+            await window.api.clearPlanRepo({ repoName: selectedRepo, year });
+            currentPlan = await window.api.getCommitPlan(selectedRepo);
+          } else {
+            await window.api.clearPlanAll({ year });
+            if (selectedRepo) {
+              currentPlan = await window.api.getCommitPlan(selectedRepo);
+            }
+          }
+          allPlans = await window.api.getAllPlans();
+          plansSummary = await window.api.getAllPlansSummary();
+          renderCalendars();
+          updatePlanActions();
+          closeClearModal();
+        });
+
+      document
+        .getElementById("clearAllConfirmBtn")
+        .addEventListener("click", async () => {
+          if (clearModalMode === "selected") {
+            await window.api.clearPlanRepo({ repoName: selectedRepo });
+            currentPlan = await window.api.getCommitPlan(selectedRepo);
+          } else {
+            await window.api.clearPlanAll({});
+            if (selectedRepo) {
+              currentPlan = await window.api.getCommitPlan(selectedRepo);
+            } else {
+              currentPlan = {};
+            }
+          }
+          allPlans = await window.api.getAllPlans();
+          plansSummary = await window.api.getAllPlansSummary();
+          renderCalendars();
+          updatePlanActions();
+          closeClearModal();
+        });
+
+      // ======== Splitter ========
+      function setupSplitter() {
+        const splitter = document.getElementById("splitter");
+        const sidebar = document.getElementById("sidebar");
+        let isResizing = false;
+
+        splitter.addEventListener("mousedown", (e) => {
+          isResizing = true;
+          document.body.style.cursor = "col-resize";
+          document.body.style.userSelect = "none";
+          e.preventDefault();
+        });
+
+        document.addEventListener("mousemove", (e) => {
+          if (!isResizing) return;
+          const newWidth = Math.max(120, Math.min(600, e.clientX));
+          sidebar.style.width = newWidth + "px";
+          sidebar.style.minWidth = newWidth + "px";
+        });
+
+        document.addEventListener("mouseup", () => {
+          if (isResizing) {
+            isResizing = false;
+            document.body.style.cursor = "";
+            document.body.style.userSelect = "";
+          }
+        });
+      }
+
+      // ======== Modal ========
+      const modalOverlay = document.getElementById("modalOverlay");
+      const modalClose = document.getElementById("modalClose");
+
+      function openModal() {
+        renderRepoTable();
+        modalOverlay.classList.add("open");
+      }
+
+      function closeModal() {
+        modalOverlay.classList.remove("open");
+        // Refresh main view when modal closes
+        refreshAll();
+      }
+
+      document.getElementById("manageBtn").addEventListener("click", openModal);
+      modalClose.addEventListener("click", closeModal);
+      modalOverlay.addEventListener("click", (e) => {
+        if (e.target === modalOverlay) closeModal();
       });
 
-      document.addEventListener('mouseup', () => {
-        if (isResizing) {
-          isResizing = false;
-          document.body.style.cursor = '';
-          document.body.style.userSelect = '';
+      // ======== Repo Table in Modal ========
+      function renderRepoTable() {
+        const tbody = document.getElementById("repoTableBody");
+        const emptyMsg = document.getElementById("emptyMsg");
+        tbody.innerHTML = "";
+
+        if (repos.length === 0) {
+          emptyMsg.style.display = "block";
+          return;
         }
-      });
-    }
+        emptyMsg.style.display = "none";
 
-    // ======== Modal ========
-    const modalOverlay = document.getElementById('modalOverlay');
-    const modalClose = document.getElementById('modalClose');
-
-    function openModal() {
-      renderRepoTable();
-      modalOverlay.classList.add('open');
-    }
-
-    function closeModal() {
-      modalOverlay.classList.remove('open');
-      // Refresh main view when modal closes
-      refreshAll();
-    }
-
-    document.getElementById('manageBtn').addEventListener('click', openModal);
-    modalClose.addEventListener('click', closeModal);
-    modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) closeModal();
-    });
-
-    // ======== Repo Table in Modal ========
-    function renderRepoTable() {
-      const tbody = document.getElementById('repoTableBody');
-      const emptyMsg = document.getElementById('emptyMsg');
-      tbody.innerHTML = '';
-
-      if (repos.length === 0) {
-        emptyMsg.style.display = 'block';
-        return;
-      }
-      emptyMsg.style.display = 'none';
-
-      repos.forEach((repo) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+        repos.forEach((repo) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
           <td class="repo-name-cell">${repo.name}</td>
           <td class="col-flag">
             <label class="toggle">
-              <input type="checkbox" ${repo.flagged ? 'checked' : ''} data-repo="${repo.name}">
+              <input type="checkbox" ${repo.flagged ? "checked" : ""} data-repo="${repo.name}">
               <span class="toggle-slider"></span>
             </label>
           </td>
@@ -787,196 +1018,218 @@
             <button class="btn btn-danger btn-sm" data-delete="${repo.name}">Delete</button>
           </td>
         `;
-        tbody.appendChild(tr);
-      });
+          tbody.appendChild(tr);
+        });
 
-      // Flag toggle handlers
-      tbody.querySelectorAll('input[data-repo]').forEach((input) => {
-        input.addEventListener('change', async () => {
-          const name = input.dataset.repo;
-          await window.api.toggleFlag(name);
+        // Flag toggle handlers
+        tbody.querySelectorAll("input[data-repo]").forEach((input) => {
+          input.addEventListener("change", async () => {
+            const name = input.dataset.repo;
+            await window.api.toggleFlag(name);
+            repos = await window.api.listRepos();
+            renderRepoTable();
+            renderRepoList();
+          });
+        });
+
+        // Delete handlers
+        tbody.querySelectorAll("button[data-delete]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const name = btn.dataset.delete;
+            if (!confirm(`Delete repository "${name}"? This cannot be undone.`))
+              return;
+            await window.api.deleteRepo(name);
+            repos = await window.api.listRepos();
+            if (selectedRepo === name) selectedRepo = null;
+            renderRepoTable();
+            renderRepoList();
+          });
+        });
+      }
+
+      // ======== Add Repo: URL ========
+      document
+        .getElementById("addUrlBtn")
+        .addEventListener("click", async () => {
+          const input = document.getElementById("repoUrlInput");
+          const url = input.value.trim();
+          if (!url) return;
+
+          const btn = document.getElementById("addUrlBtn");
+          btn.disabled = true;
+          btn.textContent = "Cloning...";
+
+          const result = await window.api.cloneRepo(url);
+          showCloneResult([result]);
+
+          btn.disabled = false;
+          btn.textContent = "Clone";
+          input.value = "";
+
           repos = await window.api.listRepos();
           renderRepoTable();
           renderRepoList();
         });
-      });
 
-      // Delete handlers
-      tbody.querySelectorAll('button[data-delete]').forEach((btn) => {
-        btn.addEventListener('click', async () => {
-          const name = btn.dataset.delete;
-          if (!confirm(`Delete repository "${name}"? This cannot be undone.`)) return;
-          await window.api.deleteRepo(name);
+      // ======== Add Repo: Local Directory ========
+      document
+        .getElementById("addLocalBtn")
+        .addEventListener("click", async () => {
+          const dirPath = await window.api.openDirectoryDialog();
+          if (!dirPath) return;
+
+          const result = await window.api.addLocalRepo(dirPath);
+          showCloneResult([result]);
+
           repos = await window.api.listRepos();
-          if (selectedRepo === name) selectedRepo = null;
           renderRepoTable();
           renderRepoList();
         });
+
+      // ======== Add Repo: Drag & Drop .txt ========
+      const dropZone = document.getElementById("dropZone");
+      const fileInput = document.getElementById("fileInput");
+
+      dropZone.addEventListener("click", () => fileInput.click());
+
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("drag-over");
       });
-    }
 
-    // ======== Add Repo: URL ========
-    document.getElementById('addUrlBtn').addEventListener('click', async () => {
-      const input = document.getElementById('repoUrlInput');
-      const url = input.value.trim();
-      if (!url) return;
-
-      const btn = document.getElementById('addUrlBtn');
-      btn.disabled = true;
-      btn.textContent = 'Cloning...';
-
-      const result = await window.api.cloneRepo(url);
-      showCloneResult([result]);
-
-      btn.disabled = false;
-      btn.textContent = 'Clone';
-      input.value = '';
-
-      repos = await window.api.listRepos();
-      renderRepoTable();
-      renderRepoList();
-    });
-
-    // ======== Add Repo: Local Directory ========
-    document.getElementById('addLocalBtn').addEventListener('click', async () => {
-      const dirPath = await window.api.openDirectoryDialog();
-      if (!dirPath) return;
-
-      const result = await window.api.addLocalRepo(dirPath);
-      showCloneResult([result]);
-
-      repos = await window.api.listRepos();
-      renderRepoTable();
-      renderRepoList();
-    });
-
-    // ======== Add Repo: Drag & Drop .txt ========
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('fileInput');
-
-    dropZone.addEventListener('click', () => fileInput.click());
-
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('drag-over');
-    });
-
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.classList.remove('drag-over');
-    });
-
-    dropZone.addEventListener('drop', async (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('drag-over');
-
-      const file = e.dataTransfer.files[0];
-      if (!file || !file.name.endsWith('.txt')) {
-        alert('Please drop a .txt file.');
-        return;
-      }
-
-      await processTextFile(file.path);
-    });
-
-    fileInput.addEventListener('change', async () => {
-      if (fileInput.files.length === 0) return;
-      await processTextFile(fileInput.files[0].path);
-      fileInput.value = '';
-    });
-
-    async function processTextFile(filePath) {
-      const urls = await window.api.readRepoFile(filePath);
-      if (urls.length === 0) return;
-
-      const progressEl = document.getElementById('cloneProgress');
-      progressEl.style.display = 'block';
-      progressEl.innerHTML = '';
-
-      const results = [];
-      for (const url of urls) {
-        const item = document.createElement('div');
-        item.className = 'clone-item';
-        item.textContent = `Cloning ${url}...`;
-        progressEl.appendChild(item);
-
-        const result = await window.api.cloneRepo(url);
-        item.textContent = `${result.name}: ${result.status}`;
-        item.classList.add(result.status === 'error' ? 'error' : 'success');
-        results.push(result);
-      }
-
-      repos = await window.api.listRepos();
-      renderRepoTable();
-      renderRepoList();
-    }
-
-    function showCloneResult(results) {
-      const progressEl = document.getElementById('cloneProgress');
-      progressEl.style.display = 'block';
-      progressEl.innerHTML = '';
-      results.forEach((r) => {
-        const item = document.createElement('div');
-        item.className = 'clone-item ' + (r.status === 'error' ? 'error' : 'success');
-        item.textContent = `${r.name}: ${r.status}${r.message ? ' - ' + r.message : ''}`;
-        progressEl.appendChild(item);
+      dropZone.addEventListener("dragleave", () => {
+        dropZone.classList.remove("drag-over");
       });
-      setTimeout(() => { progressEl.style.display = 'none'; }, 4000);
-    }
 
-    // ======== Settings Modal ========
-    const settingsModalOverlay = document.getElementById('settingsModalOverlay');
+      dropZone.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("drag-over");
 
-    function updateSettingsDot() {
-      const dot = document.getElementById('settingsDot');
-      const hasUsername = settings.username && settings.username.trim().length > 0;
-      const hasEmail = settings.email && settings.email.trim().length > 0;
-      if (hasUsername && hasEmail) {
-        dot.className = 'settings-dot set';
-        dot.title = `${settings.username} <${settings.email}>`;
-      } else {
-        dot.className = 'settings-dot not-set';
-        dot.title = 'Username or email not configured';
+        const file = e.dataTransfer.files[0];
+        if (!file || !file.name.endsWith(".txt")) {
+          alert("Please drop a .txt file.");
+          return;
+        }
+
+        await processTextFile(file.path);
+      });
+
+      fileInput.addEventListener("change", async () => {
+        if (fileInput.files.length === 0) return;
+        await processTextFile(fileInput.files[0].path);
+        fileInput.value = "";
+      });
+
+      async function processTextFile(filePath) {
+        const urls = await window.api.readRepoFile(filePath);
+        if (urls.length === 0) return;
+
+        const progressEl = document.getElementById("cloneProgress");
+        progressEl.style.display = "block";
+        progressEl.innerHTML = "";
+
+        const results = [];
+        for (const url of urls) {
+          const item = document.createElement("div");
+          item.className = "clone-item";
+          item.textContent = `Cloning ${url}...`;
+          progressEl.appendChild(item);
+
+          const result = await window.api.cloneRepo(url);
+          item.textContent = `${result.name}: ${result.status}`;
+          item.classList.add(result.status === "error" ? "error" : "success");
+          results.push(result);
+        }
+
+        repos = await window.api.listRepos();
+        renderRepoTable();
+        renderRepoList();
       }
-    }
 
-    function openSettingsModal() {
-      document.getElementById('settingsUsername').value = settings.username || '';
-      document.getElementById('settingsEmail').value = settings.email || '';
-      settingsModalOverlay.classList.add('open');
-    }
+      function showCloneResult(results) {
+        const progressEl = document.getElementById("cloneProgress");
+        progressEl.style.display = "block";
+        progressEl.innerHTML = "";
+        results.forEach((r) => {
+          const item = document.createElement("div");
+          item.className =
+            "clone-item " + (r.status === "error" ? "error" : "success");
+          item.textContent = `${r.name}: ${r.status}${r.message ? " - " + r.message : ""}`;
+          progressEl.appendChild(item);
+        });
+        setTimeout(() => {
+          progressEl.style.display = "none";
+        }, 4000);
+      }
 
-    function closeSettingsModal() {
-      settingsModalOverlay.classList.remove('open');
-    }
+      // ======== Settings Modal ========
+      const settingsModalOverlay = document.getElementById(
+        "settingsModalOverlay",
+      );
 
-    document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
-    document.getElementById('settingsModalClose').addEventListener('click', closeSettingsModal);
-    settingsModalOverlay.addEventListener('click', (e) => {
-      if (e.target === settingsModalOverlay) closeSettingsModal();
-    });
-
-    document.getElementById('settingsSaveBtn').addEventListener('click', async () => {
-      settings.username = document.getElementById('settingsUsername').value.trim();
-      settings.email = document.getElementById('settingsEmail').value.trim();
-      await window.api.saveSettings(settings);
-      updateSettingsDot();
-      closeSettingsModal();
-    });
-
-    // ======== Keyboard ========
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (settingsModalOverlay.classList.contains('open')) {
-          closeSettingsModal();
-        } else if (clearModalOverlay.classList.contains('open')) {
-          closeClearModal();
+      function updateSettingsDot() {
+        const dot = document.getElementById("settingsDot");
+        const hasUsername =
+          settings.username && settings.username.trim().length > 0;
+        const hasEmail = settings.email && settings.email.trim().length > 0;
+        if (hasUsername && hasEmail) {
+          dot.className = "settings-dot set";
+          dot.title = `${settings.username} <${settings.email}>`;
         } else {
-          closeModal();
+          dot.className = "settings-dot not-set";
+          dot.title = "Username or email not configured";
         }
       }
-    });
 
-    init();
-  </script>
-</body>
+      function openSettingsModal() {
+        document.getElementById("settingsUsername").value =
+          settings.username || "";
+        document.getElementById("settingsEmail").value = settings.email || "";
+        settingsModalOverlay.classList.add("open");
+      }
+
+      function closeSettingsModal() {
+        settingsModalOverlay.classList.remove("open");
+      }
+
+      document
+        .getElementById("settingsBtn")
+        .addEventListener("click", openSettingsModal);
+      document
+        .getElementById("settingsModalClose")
+        .addEventListener("click", closeSettingsModal);
+      settingsModalOverlay.addEventListener("click", (e) => {
+        if (e.target === settingsModalOverlay) closeSettingsModal();
+      });
+
+      document
+        .getElementById("settingsSaveBtn")
+        .addEventListener("click", async () => {
+          settings.username = document
+            .getElementById("settingsUsername")
+            .value.trim();
+          settings.email = document
+            .getElementById("settingsEmail")
+            .value.trim();
+          await window.api.saveSettings(settings);
+          updateSettingsDot();
+          closeSettingsModal();
+        });
+
+      // ======== Keyboard ========
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          if (settingsModalOverlay.classList.contains("open")) {
+            closeSettingsModal();
+          } else if (clearModalOverlay.classList.contains("open")) {
+            closeClearModal();
+          } else {
+            closeModal();
+          }
+        }
+      });
+
+      init();
+    </script>
+  </body>
 </html>

@@ -245,6 +245,11 @@ ipcMain.handle("set-commit-plan", async (event, { repoName, date, count }) => {
   return count;
 });
 
+// Get all plans raw data: { repoName: { date: count, ... }, ... }
+ipcMain.handle("get-all-plans", async () => {
+  return loadPlans();
+});
+
 // Get summary of all plans: { repoName: totalCount, ... }
 ipcMain.handle("get-all-plans-summary", async () => {
   const plans = loadPlans();

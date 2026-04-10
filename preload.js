@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('api', {
   toggleFlag: (repoName) => ipcRenderer.invoke('toggle-flag', repoName),
   getCommitPlan: (repoName) => ipcRenderer.invoke('get-commit-plan', repoName),
   setCommitPlan: (data) => ipcRenderer.invoke('set-commit-plan', data),
+  getAllPlans: () => ipcRenderer.invoke('get-all-plans'),
   getAllPlansSummary: () => ipcRenderer.invoke('get-all-plans-summary'),
   clearPlanRepo: (data) => ipcRenderer.invoke('clear-plan-repo', data),
   clearPlanAll: (data) => ipcRenderer.invoke('clear-plan-all', data),

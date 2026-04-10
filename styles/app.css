@@ -453,6 +453,14 @@ body {
   background: #39d353;
 }
 
+/* Planned commit indicator (blue tint) */
+.calendar-cell.has-plan {
+  outline: 2px solid #58a6ff;
+  outline-offset: -1px;
+  z-index: 1;
+  position: relative;
+}
+
 /* Clickable calendar cells */
 .calendar-cell.clickable {
   cursor: pointer;
