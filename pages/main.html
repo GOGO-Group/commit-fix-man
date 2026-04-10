@@ -729,12 +729,21 @@
         return map;
       }
 
+      function filterMyCommits(commits) {
+        const u = settings.username ? settings.username.trim() : '';
+        const e = settings.email ? settings.email.trim() : '';
+        if (!u && !e) return commits;
+        return commits.filter(c =>
+          (u && c.author === u) || (e && c.email === e)
+        );
+      }
+
       function renderAllCalendar() {
         const unflaggedRepos = new Set(
           repos.filter((r) => !r.flagged).map((r) => r.name),
         );
-        const unflaggedCommits = allCommits.filter((c) =>
-          unflaggedRepos.has(c.repo),
+        const unflaggedCommits = filterMyCommits(
+          allCommits.filter((c) => unflaggedRepos.has(c.repo)),
         );
         const allDateMap = getDateCountMap(unflaggedCommits, currentYear);
         const allDateRepoMap = getDateRepoMap(unflaggedCommits, currentYear);
@@ -756,7 +765,9 @@
         const titleEl = document.getElementById("selectedCalendarTitle");
         if (selectedRepo) {
           titleEl.textContent = `Selected: ${selectedRepo}`;
-          const repoCommits = allCommits.filter((c) => c.repo === selectedRepo);
+          const repoCommits = filterMyCommits(
+            allCommits.filter((c) => c.repo === selectedRepo),
+          );
           const repoDateMap = getDateCountMap(repoCommits, currentYear);
           const planMap = {};
           for (const [date, count] of Object.entries(currentPlan)) {
