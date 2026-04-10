@@ -71,6 +71,15 @@
 
       <!-- Main Content -->
       <main class="content" id="mainContent">
+        <!-- Top bar -->
+        <div class="content-topbar">
+          <label class="others-toggle" title="Show others' commits">
+            <input type="checkbox" id="showOthersToggle" checked>
+            <span class="others-toggle-slider"></span>
+            <span class="others-toggle-label">Others' commits</span>
+          </label>
+        </div>
+
         <!-- Year buttons (top) -->
         <div class="year-buttons" id="yearButtonsTop"></div>
 
@@ -105,6 +114,11 @@
                 >No planned commits</span
               >
               <div class="calendar-footer-actions">
+                <div class="random-controls">
+                  <input type="range" id="randomFreqSlider" min="1" max="10" value="5" class="freq-slider" disabled>
+                  <span class="freq-label" id="freqLabel">0.5</span>
+                  <button class="btn btn-secondary btn-xs" id="randomBtn" disabled>Random</button>
+                </div>
                 <button
                   class="btn btn-primary btn-xs"
                   id="saveSelectedBtn"
@@ -290,6 +304,7 @@
       let allPlans = {}; // { repoName: { date: count } } full plan data
       let clearModalMode = null; // 'selected' or 'all'
       let settings = { username: "", email: "" };
+      let showOthers = true;
 
       const MONTH_LABELS = [
         "Jan",
@@ -783,7 +798,7 @@
         );
         const unflaggedAll = allCommits.filter((c) => unflaggedRepos.has(c.repo));
         const unflaggedCommits = filterMyCommits(unflaggedAll);
-        const othersOnly = getOthersOnlyDates(unflaggedAll, unflaggedCommits, currentYear);
+        const othersOnly = showOthers ? getOthersOnlyDates(unflaggedAll, unflaggedCommits, currentYear) : new Set();
         const allDateMap = getDateCountMap(unflaggedCommits, currentYear);
         const allDateRepoMap = getDateRepoMap(unflaggedCommits, currentYear);
         const allPlanMap = buildAllPlanMap(currentYear);
@@ -807,7 +822,7 @@
           titleEl.textContent = `Selected: ${selectedRepo}`;
           const repoAll = allCommits.filter((c) => c.repo === selectedRepo);
           const repoCommits = filterMyCommits(repoAll);
-          const othersOnly = getOthersOnlyDates(repoAll, repoCommits, currentYear);
+          const othersOnly = showOthers ? getOthersOnlyDates(repoAll, repoCommits, currentYear) : new Set();
           const repoDateMap = getDateCountMap(repoCommits, currentYear);
           const planMap = {};
           for (const [date, count] of Object.entries(currentPlan)) {
@@ -883,6 +898,10 @@
           saveAllBtn.disabled = true;
           clearAllBtn.disabled = true;
         }
+
+        // Random controls
+        document.getElementById('randomBtn').disabled = !selectedRepo;
+        document.getElementById('randomFreqSlider').disabled = !selectedRepo;
 
         // Update sidebar badges
         renderRepoList();
@@ -1365,6 +1384,62 @@
             closeModal();
           }
         }
+      });
+
+      // ======== Others Toggle ========
+      document.getElementById('showOthersToggle').addEventListener('change', (e) => {
+        showOthers = e.target.checked;
+        renderCalendars();
+      });
+
+      // ======== Random Frequency Slider ========
+      const randomFreqSlider = document.getElementById('randomFreqSlider');
+      const freqLabel = document.getElementById('freqLabel');
+      randomFreqSlider.addEventListener('input', () => {
+        freqLabel.textContent = (randomFreqSlider.value / 10).toFixed(1);
+      });
+
+      // ======== Random Button ========
+      document.getElementById('randomBtn').addEventListener('click', async () => {
+        if (!selectedRepo) return;
+        const freq = randomFreqSlider.value / 10;
+        const year = currentYear;
+        const startDate = new Date(year, 0, 1);
+        const endDate = new Date(year, 11, 31);
+
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+          const day = d.getDay();
+          // Skip weekends (0 = Sunday, 6 = Saturday)
+          if (day === 0 || day === 6) continue;
+
+          const dateStr = d.toISOString().substring(0, 10);
+          // Skip days that already have a plan
+          if (currentPlan[dateStr]) continue;
+
+          if (Math.random() < freq) {
+            const count = Math.floor(Math.random() * 3) + 1; // 1-3 commits
+            currentPlan[dateStr] = count;
+            await window.api.setCommitPlan({
+              repoName: selectedRepo,
+              date: dateStr,
+              count: count,
+            });
+          }
+        }
+
+        // Keep allPlans in sync
+        allPlans[selectedRepo] = { ...(allPlans[selectedRepo] || {}), ...currentPlan };
+
+        // Update summary
+        const totalForRepo = Object.values(currentPlan).reduce((s, v) => s + v, 0);
+        if (totalForRepo > 0) {
+          plansSummary[selectedRepo] = totalForRepo;
+        } else {
+          delete plansSummary[selectedRepo];
+        }
+
+        renderCalendars();
+        updatePlanActions();
       });
 
       init();
