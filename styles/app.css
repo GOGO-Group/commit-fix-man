@@ -377,6 +377,12 @@ body {
   font-size: 0.95rem;
 }
 
+.selected-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .calendar-wrapper {
   overflow-x: auto;
   padding: 8px 0;

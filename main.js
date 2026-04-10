@@ -70,6 +70,8 @@ function createWindow() {
 
   // Go directly to main page
   mainWindow.loadFile("pages/main.html");
+
+  mainWindow.setContentProtection(true);
 }
 
 app.whenReady().then(createWindow);
@@ -461,7 +463,7 @@ ipcMain.handle(
       }
 
       // Write env-filter to a temp file to avoid shell escaping issues
-      const os = require('os');
+      const os = require("os");
       const scriptLines = [
         `if [ "$GIT_AUTHOR_EMAIL" = "${forkEmail}" ]; then`,
         `  GIT_AUTHOR_NAME="${username}"`,
@@ -474,16 +476,18 @@ ipcMain.handle(
         `export GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL`,
         `export GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL`,
       ];
-      const tmpFile = path.join(os.tmpdir(), 'commit-maker-env-filter.sh');
-      fs.writeFileSync(tmpFile, scriptLines.join('\n') + '\n', 'utf-8');
-      const tmpPath = tmpFile.replace(/\\/g, '/');
+      const tmpFile = path.join(os.tmpdir(), "commit-maker-env-filter.sh");
+      fs.writeFileSync(tmpFile, scriptLines.join("\n") + "\n", "utf-8");
+      const tmpPath = tmpFile.replace(/\\/g, "/");
 
       execSync(
         `git filter-branch -f --env-filter ". '${tmpPath}'" --tag-name-filter cat -- --branches --tags`,
-        { cwd: repoPath, shell: gitBash, stdio: 'pipe', timeout: 300000 },
+        { cwd: repoPath, shell: gitBash, stdio: "pipe", timeout: 300000 },
       );
 
-      try { fs.unlinkSync(tmpFile); } catch (e) {}
+      try {
+        fs.unlinkSync(tmpFile);
+      } catch (e) {}
 
       return { success: true };
     } catch (err) {
@@ -491,3 +495,22 @@ ipcMain.handle(
     }
   },
 );
+
+// Get remote URL for a repository
+ipcMain.handle("get-repo-url", async (event, repoName) => {
+  const repoPath = path.join(REPO_DIR, repoName);
+  if (!fs.existsSync(repoPath)) return null;
+  try {
+    const git = simpleGit(repoPath);
+    const remotes = await git.getRemotes(true);
+    const origin = remotes.find((r) => r.name === "origin");
+    return origin ? origin.refs.fetch : null;
+  } catch (e) {
+    return null;
+  }
+});
+
+// Open URL in default browser
+ipcMain.handle("open-external", async (event, url) => {
+  await shell.openExternal(url);
+});
