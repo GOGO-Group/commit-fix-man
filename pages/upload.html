@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commit Maker - Upload Repositories</title>
+  <link rel="stylesheet" href="../styles/app.css">
+</head>
+<body class="upload-page">
+  <div class="upload-container">
+    <h1>Commit Maker</h1>
+    <p class="subtitle">Upload a .txt file containing repository URLs (one per line)</p>
+
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">&#128193;</div>
+      <p>Click to select a .txt file</p>
+      <p class="hint">or drag and drop</p>
+    </div>
+
+    <div id="repoList" class="repo-list" style="display:none;">
+      <h3>Repositories to clone:</h3>
+      <ul id="repoUrls"></ul>
+    </div>
+
+    <div id="progress" class="progress-section" style="display:none;">
+      <h3>Cloning Progress:</h3>
+      <div id="progressItems"></div>
+    </div>
+
+    <div class="button-row">
+      <button id="cloneBtn" class="btn btn-primary" style="display:none;">Clone All</button>
+      <button id="mainBtn" class="btn btn-secondary" style="display:none;">Go to Main Page</button>
+      <button id="skipBtn" class="btn btn-secondary">Skip to Main Page</button>
+    </div>
+  </div>
+
+  <script>
+    const uploadArea = document.getElementById('uploadArea');
+    const repoList = document.getElementById('repoList');
+    const repoUrls = document.getElementById('repoUrls');
+    const cloneBtn = document.getElementById('cloneBtn');
+    const mainBtn = document.getElementById('mainBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    const progress = document.getElementById('progress');
+    const progressItems = document.getElementById('progressItems');
+
+    let urls = [];
+
+    uploadArea.addEventListener('click', async () => {
+      const filePath = await window.api.openFileDialog();
+      if (!filePath) return;
+      urls = await window.api.readRepoFile(filePath);
+      showRepoList();
+    });
+
+    function showRepoList() {
+      if (urls.length === 0) return;
+      repoUrls.innerHTML = '';
+      urls.forEach((url) => {
+        const li = document.createElement('li');
+        li.textContent = url;
+        repoUrls.appendChild(li);
+      });
+      repoList.style.display = 'block';
+      cloneBtn.style.display = 'inline-block';
+    }
+
+    cloneBtn.addEventListener('click', async () => {
+      cloneBtn.disabled = true;
+      cloneBtn.textContent = 'Cloning...';
+      progress.style.display = 'block';
+      progressItems.innerHTML = '';
+
+      for (const url of urls) {
+        const item = document.createElement('div');
+        item.className = 'progress-item';
+        item.textContent = `Cloning ${url}...`;
+        progressItems.appendChild(item);
+
+        const result = await window.api.cloneRepo(url);
+        item.textContent = `${result.name}: ${result.status}`;
+        item.classList.add(result.status === 'error' ? 'error' : 'success');
+      }
+
+      cloneBtn.textContent = 'Done!';
+      mainBtn.style.display = 'inline-block';
+    });
+
+    mainBtn.addEventListener('click', () => window.api.goToMain());
+    skipBtn.addEventListener('click', () => window.api.goToMain());
+  </script>
+</body>
+</html>

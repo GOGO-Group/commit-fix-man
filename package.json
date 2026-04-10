@@ -1,0 +1,15 @@
+{
+  "name": "commit-maker",
+  "version": "1.0.0",
+  "description": "View and manage commit calendars across multiple repositories",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "simple-git": "^3.22.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0"
+  }
+}
