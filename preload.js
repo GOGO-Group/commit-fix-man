@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld('api', {
   saveSettings: (data) => ipcRenderer.invoke('save-settings', data),
   getRepoUrl: (repoName) => ipcRenderer.invoke('get-repo-url', repoName),
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
+  pushRepo: (data) => ipcRenderer.invoke('push-repo', data),
   onCommitProgress: (callback) => {
     ipcRenderer.on('commit-progress', (event, data) => callback(data));
   },

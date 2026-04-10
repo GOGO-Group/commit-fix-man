@@ -319,6 +319,21 @@ body {
   color: #fff;
 }
 
+.year-btn-expand {
+  font-weight: 700;
+  font-size: 1rem !important;
+  padding: 4px 12px !important;
+  color: #58a6ff;
+  border-color: #30363d;
+  background: #161b22;
+}
+
+.year-btn-expand:hover {
+  background: #1f6feb;
+  border-color: #1f6feb;
+  color: #fff;
+}
+
 /* Calendar sections */
 .calendars {
   display: flex;
@@ -1150,6 +1165,99 @@ body {
   .add-repo-row {
     flex-direction: column;
   }
+}
+
+/* Calendar action buttons - distinct colors */
+.btn-save {
+  background: #238636;
+  color: #fff;
+}
+
+.btn-save:hover {
+  background: #2ea043;
+}
+
+.btn-save:disabled {
+  background: #1a5a2a;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+}
+
+.btn-clear {
+  background: #da3633;
+  color: #fff;
+}
+
+.btn-clear:hover {
+  background: #f85149;
+}
+
+.btn-clear:disabled {
+  background: #4a1516;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+}
+
+.btn-fork {
+  background: #8957e5;
+  color: #fff;
+}
+
+.btn-fork:hover {
+  background: #a371f7;
+}
+
+.btn-fork:disabled {
+  background: #3b2362;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+}
+
+.btn-push {
+  background: #1f6feb;
+  color: #fff;
+}
+
+.btn-push:hover {
+  background: #388bfd;
+}
+
+.btn-push:disabled {
+  background: #143d6e;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+}
+
+.btn-random {
+  background: #d29922;
+  color: #fff;
+}
+
+.btn-random:hover {
+  background: #e3b341;
+}
+
+.btn-random:disabled {
+  background: #4d3610;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+}
+
+/* Push confirm modal */
+.push-confirm-value {
+  padding: 8px 12px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: 0.9rem;
+  word-break: break-all;
+}
+
+.push-confirm-warning {
+  color: #f85149;
+  font-size: 0.85rem;
+  margin: 8px 0;
 }
 
 /* Scrollbar styling */

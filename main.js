@@ -8,17 +8,22 @@ const DATA_DIR = app.isPackaged
   ? path.join(app.getPath("userData"), "data")
   : __dirname;
 
-const REPO_DIR = path.join(DATA_DIR, "repository");
 const FLAGS_FILE = path.join(DATA_DIR, "repo-flags.json");
 const PLANS_FILE = path.join(DATA_DIR, "commit-plans.json");
 const SETTINGS_FILE = path.join(DATA_DIR, "settings.json");
 
-// Ensure data and repository directories exist
+// Ensure data directory exists
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
-if (!fs.existsSync(REPO_DIR)) {
-  fs.mkdirSync(REPO_DIR, { recursive: true });
+
+// Get repo directory from settings. Returns null if not configured.
+function getRepoDir() {
+  const s = loadSettings();
+  if (s.repoDir && s.repoDir.trim()) {
+    return s.repoDir.trim();
+  }
+  return null;
 }
 
 // Load/save flags (flagged repos are excluded from calendar)
@@ -56,7 +61,7 @@ function loadSettings() {
       return JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf-8"));
     }
   } catch (e) {}
-  return { username: "", email: "", gitBash: "" };
+  return { username: "", email: "", gitBash: "", repoDir: "" };
 }
 
 function saveSettings(settings) {
@@ -67,8 +72,8 @@ let mainWindow;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    width: 1225,
+    height: 740,
     icon: path.join(__dirname, "static", "icon.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -134,11 +139,13 @@ ipcMain.handle("open-directory-dialog", async () => {
 
 // Clone a single repository
 ipcMain.handle("clone-repo", async (event, repoUrl) => {
+  const repoDir = getRepoDir();
+  if (!repoDir) return { name: repoUrl, status: "error", message: "Repository directory not set in Settings" };
   const repoName = repoUrl
     .replace(/\.git$/, "")
     .split(/[/\\]/)
     .pop();
-  const targetPath = path.join(REPO_DIR, repoName);
+  const targetPath = path.join(repoDir, repoName);
 
   if (fs.existsSync(targetPath)) {
     return { name: repoName, status: "already exists" };
@@ -155,8 +162,10 @@ ipcMain.handle("clone-repo", async (event, repoUrl) => {
 
 // Add a local directory as a repo (copy or symlink)
 ipcMain.handle("add-local-repo", async (event, dirPath) => {
+  const repoDir = getRepoDir();
+  if (!repoDir) return { name: path.basename(dirPath), status: "error", message: "Repository directory not set in Settings" };
   const repoName = path.basename(dirPath);
-  const targetPath = path.join(REPO_DIR, repoName);
+  const targetPath = path.join(repoDir, repoName);
 
   if (fs.existsSync(targetPath)) {
     return { name: repoName, status: "already exists" };
@@ -179,7 +188,9 @@ ipcMain.handle("add-local-repo", async (event, dirPath) => {
 
 // Delete a repository from the repository directory
 ipcMain.handle("delete-repo", async (event, repoName) => {
-  const targetPath = path.join(REPO_DIR, repoName);
+  const repoDir = getRepoDir();
+  if (!repoDir) return { success: false, message: "Repository directory not set" };
+  const targetPath = path.join(repoDir, repoName);
   if (!fs.existsSync(targetPath)) {
     return { success: false, message: "Not found" };
   }
@@ -206,8 +217,9 @@ ipcMain.handle("delete-repo", async (event, repoName) => {
 
 // List all repos in the repository directory
 ipcMain.handle("list-repos", async () => {
-  if (!fs.existsSync(REPO_DIR)) return [];
-  const entries = fs.readdirSync(REPO_DIR, { withFileTypes: true });
+  const repoDir = getRepoDir();
+  if (!repoDir || !fs.existsSync(repoDir)) return [];
+  const entries = fs.readdirSync(repoDir, { withFileTypes: true });
   const flags = loadFlags();
   return entries
     .filter((e) => e.isDirectory() || e.isSymbolicLink())
@@ -227,7 +239,9 @@ ipcMain.handle("toggle-flag", async (event, repoName) => {
 
 // Get commits using raw git log
 ipcMain.handle("get-commits-raw", async (event, repoName) => {
-  const repoPath = path.join(REPO_DIR, repoName);
+  const repoDir = getRepoDir();
+  if (!repoDir) return [];
+  const repoPath = path.join(repoDir, repoName);
   if (!fs.existsSync(repoPath)) return [];
 
   try {
@@ -345,7 +359,9 @@ ipcMain.handle("save-settings", async (event, settings) => {
 ipcMain.handle(
   "execute-plan",
   async (event, { repoName, plan, username, email }) => {
-    const repoPath = path.join(REPO_DIR, repoName);
+    const repoDir = getRepoDir();
+    if (!repoDir) return { success: false, message: "Repository directory not set" };
+    const repoPath = path.join(repoDir, repoName);
     if (!fs.existsSync(repoPath)) {
       return { success: false, message: "Repository not found" };
     }
@@ -437,7 +453,9 @@ ipcMain.handle(
 ipcMain.handle(
   "fork-repo",
   async (event, { repoName, forkEmail, username, email }) => {
-    let repoPath = path.join(REPO_DIR, repoName);
+    const repoDir = getRepoDir();
+    if (!repoDir) return { success: false, message: "Repository directory not set" };
+    let repoPath = path.join(repoDir, repoName);
     if (!fs.existsSync(repoPath)) {
       return { success: false, message: "Repository not found" };
     }
@@ -507,7 +525,9 @@ ipcMain.handle(
 
 // Get remote URL for a repository
 ipcMain.handle("get-repo-url", async (event, repoName) => {
-  const repoPath = path.join(REPO_DIR, repoName);
+  const repoDir = getRepoDir();
+  if (!repoDir) return null;
+  const repoPath = path.join(repoDir, repoName);
   if (!fs.existsSync(repoPath)) return null;
   try {
     const git = simpleGit(repoPath);
@@ -522,4 +542,31 @@ ipcMain.handle("get-repo-url", async (event, repoName) => {
 // Open URL in default browser
 ipcMain.handle("open-external", async (event, url) => {
   await shell.openExternal(url);
+});
+
+// Push repository: set remote origin and force push
+ipcMain.handle("push-repo", async (event, { repoName, remoteUrl }) => {
+  const repoDir = getRepoDir();
+  if (!repoDir) return { success: false, message: "Repository directory not set" };
+  const repoPath = path.join(repoDir, repoName);
+  if (!fs.existsSync(repoPath)) {
+    return { success: false, message: "Repository not found" };
+  }
+
+  try {
+    const git = simpleGit(repoPath);
+    // Remove existing origin if any
+    try {
+      await git.removeRemote("origin");
+    } catch (e) {
+      // origin may not exist, ignore
+    }
+    // Add new origin
+    await git.addRemote("origin", remoteUrl);
+    // Force push
+    await git.push("origin", "--all", ["--force"]);
+    return { success: true };
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
 });

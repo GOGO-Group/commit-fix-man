@@ -93,11 +93,11 @@
                 >No planned commits</span
               >
               <div class="calendar-footer-actions">
-                <button class="btn btn-primary btn-xs" id="saveAllBtn" disabled>
+                <button class="btn btn-save btn-xs" id="saveAllBtn" disabled>
                   Save All
                 </button>
                 <button
-                  class="btn btn-secondary btn-xs"
+                  class="btn btn-clear btn-xs"
                   id="clearAllBtn"
                   disabled
                 >
@@ -125,18 +125,19 @@
                 <div class="random-controls">
                   <input type="range" id="randomFreqSlider" min="1" max="10" value="5" class="freq-slider" disabled>
                   <span class="freq-label" id="freqLabel">0.5</span>
-                  <button class="btn btn-secondary btn-xs" id="randomBtn" disabled>Random</button>
+                  <button class="btn btn-random btn-xs" id="randomBtn" disabled>Random</button>
                 </div>
                 <button
-                  class="btn btn-primary btn-xs"
+                  class="btn btn-save btn-xs"
                   id="saveSelectedBtn"
                   disabled
                 >
                   Save
                 </button>
-                <button class="btn btn-secondary btn-xs" id="forkBtn" disabled>Fork</button>
+                <button class="btn btn-fork btn-xs" id="forkBtn" disabled>Fork</button>
+                <button class="btn btn-push btn-xs" id="pushBtn" disabled>Push</button>
                 <button
-                  class="btn btn-secondary btn-xs"
+                  class="btn btn-clear btn-xs"
                   id="clearSelectedBtn"
                   disabled
                 >
@@ -284,6 +285,18 @@
                 <button class="btn btn-secondary btn-sm" id="settingsBrowseGitBash">Browse</button>
               </div>
             </div>
+            <div class="settings-field">
+              <label for="settingsRepoDir">Repository Directory</label>
+              <div class="settings-file-row">
+                <input
+                  type="text"
+                  id="settingsRepoDir"
+                  class="input"
+                  placeholder="Default: app data directory"
+                />
+                <button class="btn btn-secondary btn-sm" id="settingsBrowseRepoDir">Browse</button>
+              </div>
+            </div>
             <div class="settings-actions">
               <button class="btn btn-primary btn-sm" id="settingsSaveBtn">
                 Save
@@ -336,6 +349,56 @@
           <div id="progressSpinnerSection" style="display:none;">
             <div class="progress-spinner"></div>
             <p class="progress-spinner-text" id="progressSpinnerText">Processing...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Push URL Modal -->
+    <div class="modal-overlay" id="pushUrlModalOverlay">
+      <div class="modal modal-sm">
+        <div class="modal-header">
+          <h2>Push Repository</h2>
+          <button class="modal-close" id="pushUrlModalClose">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="clear-modal-desc">Enter the remote repository URL to push to.</p>
+          <div class="settings-form">
+            <div class="settings-field">
+              <label for="pushUrlInput">Repository URL</label>
+              <input type="text" id="pushUrlInput" class="input" placeholder="https://github.com/user/repo.git">
+            </div>
+            <div class="settings-actions">
+              <button class="btn btn-primary btn-sm" id="pushUrlNextBtn">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Push Confirm Modal -->
+    <div class="modal-overlay" id="pushConfirmModalOverlay">
+      <div class="modal modal-sm">
+        <div class="modal-header">
+          <h2>Confirm Push</h2>
+          <button class="modal-close" id="pushConfirmModalClose">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="clear-modal-desc">Please confirm the push details:</p>
+          <div class="settings-form">
+            <div class="settings-field">
+              <label>Repository</label>
+              <div class="push-confirm-value" id="pushConfirmRepo"></div>
+            </div>
+            <div class="settings-field">
+              <label>Remote URL</label>
+              <div class="push-confirm-value" id="pushConfirmUrl"></div>
+            </div>
+            <p class="push-confirm-warning">This will force push to the remote. Existing remote history will be overwritten.</p>
+            <div class="clear-modal-buttons">
+              <button class="btn btn-secondary" id="pushConfirmBackBtn">Back</button>
+              <button class="btn btn-danger" id="pushConfirmOkBtn">Push</button>
+            </div>
           </div>
         </div>
       </div>
@@ -515,6 +578,9 @@
         });
 
       // ======== Year Buttons ========
+      let extraYearsBefore = 0;
+      let extraYearsAfter = 0;
+
       function buildYearButtons() {
         const years = new Set();
         allCommits.forEach((c) => {
@@ -524,10 +590,30 @@
 
         const sortedYears = [...years].sort((a, b) => a - b);
 
+        // Expand range with extra years
+        const minYear = sortedYears[0] - extraYearsBefore;
+        const maxYear = sortedYears[sortedYears.length - 1] + extraYearsAfter;
+        const fullYears = [];
+        for (let y = minYear; y <= maxYear; y++) {
+          fullYears.push(y);
+        }
+
         const renderButtons = (containerId) => {
           const container = document.getElementById(containerId);
           container.innerHTML = "";
-          sortedYears.forEach((year) => {
+
+          // + button at the start (adds earlier year)
+          const prevBtn = document.createElement("button");
+          prevBtn.textContent = "+";
+          prevBtn.className = "year-btn year-btn-expand";
+          prevBtn.title = "Show earlier year";
+          prevBtn.addEventListener("click", () => {
+            extraYearsBefore++;
+            buildYearButtons();
+          });
+          container.appendChild(prevBtn);
+
+          fullYears.forEach((year) => {
             const btn = document.createElement("button");
             btn.textContent = year;
             btn.className =
@@ -539,6 +625,17 @@
             });
             container.appendChild(btn);
           });
+
+          // + button at the end (adds later year)
+          const nextBtn = document.createElement("button");
+          nextBtn.textContent = "+";
+          nextBtn.className = "year-btn year-btn-expand";
+          nextBtn.title = "Show later year";
+          nextBtn.addEventListener("click", () => {
+            extraYearsAfter++;
+            buildYearButtons();
+          });
+          container.appendChild(nextBtn);
         };
 
         renderButtons("yearButtonsTop");
@@ -1022,6 +1119,7 @@
         document.getElementById('randomBtn').disabled = !selectedRepo;
         document.getElementById('randomFreqSlider').disabled = !selectedRepo;
         document.getElementById('forkBtn').disabled = !selectedRepo;
+        document.getElementById('pushBtn').disabled = !selectedRepo;
 
         // Update sidebar badges
         renderRepoList();
@@ -1473,6 +1571,7 @@
           settings.username || "";
         document.getElementById("settingsEmail").value = settings.email || "";
         document.getElementById("settingsGitBash").value = settings.gitBash || "";
+        document.getElementById("settingsRepoDir").value = settings.repoDir || "";
         settingsModalOverlay.classList.add("open");
       }
 
@@ -1501,6 +1600,9 @@
             .value.trim();
           settings.gitBash = document
             .getElementById("settingsGitBash")
+            .value.trim();
+          settings.repoDir = document
+            .getElementById("settingsRepoDir")
             .value.trim();
           await window.api.saveSettings(settings);
           updateSettingsDot();
@@ -1565,7 +1667,11 @@
       // ======== Keyboard ========
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-          if (forkModalOverlay.classList.contains("open")) {
+          if (document.getElementById('pushConfirmModalOverlay').classList.contains("open")) {
+            document.getElementById('pushConfirmModalOverlay').classList.remove("open");
+          } else if (document.getElementById('pushUrlModalOverlay').classList.contains("open")) {
+            document.getElementById('pushUrlModalOverlay').classList.remove("open");
+          } else if (forkModalOverlay.classList.contains("open")) {
             forkModalOverlay.classList.remove("open");
           } else if (settingsModalOverlay.classList.contains("open")) {
             closeSettingsModal();
@@ -1637,6 +1743,76 @@
 
         renderCalendars();
         updatePlanActions();
+      });
+
+      // ======== Browse Repo Directory ========
+      document
+        .getElementById("settingsBrowseRepoDir")
+        .addEventListener("click", async () => {
+          const dirPath = await window.api.openDirectoryDialog();
+          if (dirPath) {
+            document.getElementById("settingsRepoDir").value = dirPath;
+          }
+        });
+
+      // ======== Push Modal Flow ========
+      const pushUrlModalOverlay = document.getElementById('pushUrlModalOverlay');
+      const pushConfirmModalOverlay = document.getElementById('pushConfirmModalOverlay');
+
+      document.getElementById('pushBtn').addEventListener('click', () => {
+        if (!selectedRepo) return;
+        document.getElementById('pushUrlInput').value = '';
+        pushUrlModalOverlay.classList.add('open');
+      });
+
+      document.getElementById('pushUrlModalClose').addEventListener('click', () => {
+        pushUrlModalOverlay.classList.remove('open');
+      });
+      pushUrlModalOverlay.addEventListener('click', (e) => {
+        if (e.target === pushUrlModalOverlay) pushUrlModalOverlay.classList.remove('open');
+      });
+
+      document.getElementById('pushUrlNextBtn').addEventListener('click', () => {
+        const url = document.getElementById('pushUrlInput').value.trim();
+        if (!url) {
+          alert('Please enter a repository URL.');
+          return;
+        }
+        pushUrlModalOverlay.classList.remove('open');
+        document.getElementById('pushConfirmRepo').textContent = selectedRepo;
+        document.getElementById('pushConfirmUrl').textContent = url;
+        pushConfirmModalOverlay.classList.add('open');
+      });
+
+      document.getElementById('pushConfirmModalClose').addEventListener('click', () => {
+        pushConfirmModalOverlay.classList.remove('open');
+      });
+      pushConfirmModalOverlay.addEventListener('click', (e) => {
+        if (e.target === pushConfirmModalOverlay) pushConfirmModalOverlay.classList.remove('open');
+      });
+
+      document.getElementById('pushConfirmBackBtn').addEventListener('click', () => {
+        pushConfirmModalOverlay.classList.remove('open');
+        pushUrlModalOverlay.classList.add('open');
+      });
+
+      document.getElementById('pushConfirmOkBtn').addEventListener('click', async () => {
+        const repoName = document.getElementById('pushConfirmRepo').textContent;
+        const remoteUrl = document.getElementById('pushConfirmUrl').textContent;
+        pushConfirmModalOverlay.classList.remove('open');
+
+        openProgressModal(`Pushing: ${repoName}`, 'spinner');
+        document.getElementById('progressSpinnerText').textContent = 'Pushing to remote...';
+
+        const result = await window.api.pushRepo({ repoName, remoteUrl });
+
+        closeProgressModal();
+
+        if (result.success) {
+          alert('Push completed successfully.');
+        } else {
+          alert('Push failed: ' + result.message);
+        }
       });
 
       init();
