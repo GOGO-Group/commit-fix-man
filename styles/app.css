@@ -497,7 +497,7 @@ body {
   border-radius: 6px;
   color: #c9d1d9;
   font-size: 0.8rem;
-  pointer-events: none;
+  pointer-events: auto;
   z-index: 2000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   max-width: 260px;
@@ -530,6 +530,17 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.tooltip-email {
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 1px 4px;
+}
+
+.tooltip-email:hover {
+  background: #30363d;
+  color: #58a6ff;
 }
 
 /* Calendar legend */
@@ -900,6 +911,15 @@ body {
 
 .settings-field input:focus {
   border-color: #58a6ff;
+}
+
+.settings-file-row {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-file-row .input {
+  flex: 1;
 }
 
 .settings-actions {

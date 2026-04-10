@@ -264,6 +264,18 @@
                 placeholder="your@email.com"
               />
             </div>
+            <div class="settings-field">
+              <label for="settingsGitBash">Git Bash Path</label>
+              <div class="settings-file-row">
+                <input
+                  type="text"
+                  id="settingsGitBash"
+                  class="input"
+                  placeholder="C:\Program Files\Git\bin\bash.exe"
+                />
+                <button class="btn btn-secondary btn-sm" id="settingsBrowseGitBash">Browse</button>
+              </div>
+            </div>
             <div class="settings-actions">
               <button class="btn btn-primary btn-sm" id="settingsSaveBtn">
                 Save
@@ -355,6 +367,10 @@
       const tooltip = document.getElementById("tooltip");
 
       function showTooltipForCell(cell, html) {
+        if (tooltipHideTimer) {
+          clearTimeout(tooltipHideTimer);
+          tooltipHideTimer = null;
+        }
         tooltip.innerHTML = html;
         tooltip.style.display = "block";
 
@@ -375,9 +391,37 @@
         tooltip.style.top = y + "px";
       }
 
+      let tooltipHideTimer = null;
+
       function hideTooltip() {
-        tooltip.style.display = "none";
+        tooltipHideTimer = setTimeout(() => {
+          tooltip.style.display = "none";
+        }, 200);
       }
+
+      // Keep tooltip open when cursor moves onto it
+      tooltip.addEventListener("mouseenter", () => {
+        if (tooltipHideTimer) {
+          clearTimeout(tooltipHideTimer);
+          tooltipHideTimer = null;
+        }
+      });
+      tooltip.addEventListener("mouseleave", () => {
+        tooltip.style.display = "none";
+      });
+
+      // Click-to-copy email from tooltip
+      tooltip.addEventListener("click", (e) => {
+        const emailEl = e.target.closest(".tooltip-email");
+        if (emailEl) {
+          const email = emailEl.dataset.email;
+          navigator.clipboard.writeText(email).then(() => {
+            const orig = emailEl.textContent;
+            emailEl.textContent = "Copied!";
+            setTimeout(() => { emailEl.textContent = orig; }, 1000);
+          });
+        }
+      });
 
       // ======== Init ========
       async function init() {
@@ -504,6 +548,19 @@
         return map;
       }
 
+      // Build per-date email breakdown: { "YYYY-MM-DD": { email: count, ... } }
+      function getDateEmailMap(commits, year) {
+        const map = {};
+        commits.forEach((c) => {
+          if (c.date && c.date.startsWith(String(year))) {
+            if (!map[c.date]) map[c.date] = {};
+            const key = c.email || 'unknown';
+            map[c.date][key] = (map[c.date][key] || 0) + 1;
+          }
+        });
+        return map;
+      }
+
       // Build per-date repo breakdown: { "YYYY-MM-DD": { repoName: count, ... } }
       function getDateRepoMap(commits, year) {
         const map = {};
@@ -552,16 +609,19 @@
       }
 
       // Build tooltip HTML for "Selected" calendar cell
-      function buildSelectedTooltipHtml(dateStr, repoCount, planCount) {
+      function buildSelectedTooltipHtml(dateStr, emailMap, planCount) {
+        const entries = emailMap ? Object.entries(emailMap).sort((a, b) => b[1] - a[1]) : [];
+        const commitTotal = entries.reduce((s, [, c]) => s + c, 0);
+        const total = commitTotal + planCount;
         let html = `<div class="tooltip-date">${dateStr}</div>`;
-        const total = repoCount + planCount;
         html += `<div class="tooltip-count">${total} commit${total !== 1 ? "s" : ""}</div>`;
-        if (repoCount > 0 || planCount > 0) {
+        if (entries.length > 0 || planCount > 0) {
           html += '<div class="tooltip-repos">';
-          if (repoCount > 0)
-            html += `<div class="tooltip-repo-row">Existing: ${repoCount}</div>`;
+          entries.forEach(([email, count]) => {
+            html += `<div class="tooltip-repo-row tooltip-email" data-email="${escapeHtml(email)}">${escapeHtml(email)}: ${count}</div>`;
+          });
           if (planCount > 0)
-            html += `<div class="tooltip-repo-row">Planned: ${planCount}</div>`;
+            html += `<div class="tooltip-repo-row" style="color:#58a6ff;">Planned: ${planCount}</div>`;
           html += "</div>";
         }
         return html;
@@ -578,6 +638,7 @@
           tooltipMode,
           repoDateMap,
           planMap,
+          dateEmailMap,
         } = options;
 
         const startDate = new Date(currentYear, 0, 1);
@@ -666,9 +727,9 @@
                       pc,
                     );
                   } else {
-                    const rc = repoDateMap ? repoDateMap[dateStr] || 0 : 0;
+                    const em = dateEmailMap ? dateEmailMap[dateStr] || {} : {};
                     const pc = parseInt(cell.dataset.planCount || "0");
-                    html = buildSelectedTooltipHtml(dateStr, rc, pc);
+                    html = buildSelectedTooltipHtml(dateStr, em, pc);
                   }
                   showTooltipForCell(cell, html);
                 });
@@ -731,9 +792,10 @@
                         cellPlanCount,
                       );
                     } else {
+                      const em = dateEmailMap ? dateEmailMap[dateStr] || {} : {};
                       html = buildSelectedTooltipHtml(
                         dateStr,
-                        rc,
+                        em,
                         newPlanCount,
                       );
                     }
@@ -863,12 +925,14 @@
           for (const [date, count] of Object.entries(planMap)) {
             mergedMap[date] = (mergedMap[date] || 0) + count;
           }
+          const emailMap = getDateEmailMap(repoAll, currentYear);
           renderCalendar("calendarSelected", mergedMap, {
             clickable: true,
             tooltipMode: "selected",
             repoDateMap: repoDateMap,
             planMap: planMap,
             othersOnly: othersOnly,
+            dateEmailMap: emailMap,
           });
         } else {
           titleEl.textContent = "Selected Repository (none)";
@@ -1382,6 +1446,7 @@
         document.getElementById("settingsUsername").value =
           settings.username || "";
         document.getElementById("settingsEmail").value = settings.email || "";
+        document.getElementById("settingsGitBash").value = settings.gitBash || "";
         settingsModalOverlay.classList.add("open");
       }
 
@@ -1408,9 +1473,21 @@
           settings.email = document
             .getElementById("settingsEmail")
             .value.trim();
+          settings.gitBash = document
+            .getElementById("settingsGitBash")
+            .value.trim();
           await window.api.saveSettings(settings);
           updateSettingsDot();
           closeSettingsModal();
+        });
+
+      document
+        .getElementById("settingsBrowseGitBash")
+        .addEventListener("click", async () => {
+          const filePath = await window.api.openExeDialog();
+          if (filePath) {
+            document.getElementById("settingsGitBash").value = filePath;
+          }
         });
 
       // ======== Fork Modal ========

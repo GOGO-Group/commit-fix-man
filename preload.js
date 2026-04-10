@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('api', {
   openFileDialog: () => ipcRenderer.invoke('open-file-dialog'),
   openDirectoryDialog: () => ipcRenderer.invoke('open-directory-dialog'),
+  openExeDialog: () => ipcRenderer.invoke('open-exe-dialog'),
   readRepoFile: (filePath) => ipcRenderer.invoke('read-repo-file', filePath),
   cloneRepo: (repoUrl) => ipcRenderer.invoke('clone-repo', repoUrl),
   addLocalRepo: (dirPath) => ipcRenderer.invoke('add-local-repo', dirPath),

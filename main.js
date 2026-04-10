@@ -48,7 +48,7 @@ function loadSettings() {
       return JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf-8"));
     }
   } catch (e) {}
-  return { username: "", email: "" };
+  return { username: "", email: "", gitBash: "" };
 }
 
 function saveSettings(settings) {
@@ -94,6 +94,19 @@ ipcMain.handle("open-file-dialog", async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ["openFile"],
     filters: [{ name: "Text Files", extensions: ["txt"] }],
+  });
+  if (result.canceled) return null;
+  return result.filePaths[0];
+});
+
+// Open executable file dialog
+ipcMain.handle("open-exe-dialog", async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ["openFile"],
+    filters: [
+      { name: "Executable", extensions: ["exe"] },
+      { name: "All Files", extensions: ["*"] },
+    ],
   });
   if (result.canceled) return null;
   return result.filePaths[0];
@@ -319,66 +332,81 @@ ipcMain.handle("save-settings", async (event, settings) => {
 
 // Execute commit plan for a repository: create commits for each date/count entry
 ipcMain.handle(
-  'execute-plan',
+  "execute-plan",
   async (event, { repoName, plan, username, email }) => {
     const repoPath = path.join(REPO_DIR, repoName);
     if (!fs.existsSync(repoPath)) {
-      return { success: false, message: 'Repository not found' };
+      return { success: false, message: "Repository not found" };
     }
     if (!username || !email) {
-      return { success: false, message: 'Username and email must be set in Settings' };
+      return {
+        success: false,
+        message: "Username and email must be set in Settings",
+      };
     }
 
     try {
-      const dummyFile = path.join(repoPath, '.commit-log');
+      const dummyFile = path.join(repoPath, ".commit-log");
       let totalCommits = 0;
 
       // Collect existing commit messages from the repo
       const git0 = simpleGit(repoPath);
       let repoMessages = [];
       try {
-        const logResult = await git0.raw(['log', '--all', '--format=%s']);
+        const logResult = await git0.raw(["log", "--all", "--format=%s"]);
         if (logResult) {
-          repoMessages = logResult.trim().split('\n').filter(m => m.length > 0);
+          repoMessages = logResult
+            .trim()
+            .split("\n")
+            .filter((m) => m.length > 0);
         }
       } catch (e) {}
 
       // Calculate grand total for progress
-      const entries = Object.entries(plan).sort((a, b) => a[0].localeCompare(b[0]));
+      const entries = Object.entries(plan).sort((a, b) =>
+        a[0].localeCompare(b[0]),
+      );
       const grandTotal = entries.reduce((s, [, c]) => s + c, 0);
 
       for (const [date, count] of entries) {
         for (let i = 0; i < count; i++) {
           // Generate random time HH:MM:SS
-          const hours = String(Math.floor(Math.random() * 24)).padStart(2, '0');
-          const minutes = String(Math.floor(Math.random() * 60)).padStart(2, '0');
-          const seconds = String(Math.floor(Math.random() * 60)).padStart(2, '0');
+          const hours = String(Math.floor(Math.random() * 24)).padStart(2, "0");
+          const minutes = String(Math.floor(Math.random() * 60)).padStart(
+            2,
+            "0",
+          );
+          const seconds = String(Math.floor(Math.random() * 60)).padStart(
+            2,
+            "0",
+          );
           const commitTime = `${date}T${hours}:${minutes}:${seconds}`;
 
           // Append to dummy file
-          fs.appendFileSync(dummyFile, ' ');
+          fs.appendFileSync(dummyFile, " ");
 
           // Stage and commit using raw git with env vars
           const git = simpleGit(repoPath);
-          await git.add('.commit-log');
+          await git.add(".commit-log");
 
           // Pick a random existing commit message, or fallback
-          const commitMsg = repoMessages.length > 0
-            ? repoMessages[Math.floor(Math.random() * repoMessages.length)]
-            : `Update ${date}`;
+          const commitMsg =
+            repoMessages.length > 0
+              ? repoMessages[Math.floor(Math.random() * repoMessages.length)]
+              : `Update ${date}`;
           await git
-            .env('GIT_AUTHOR_DATE', commitTime)
-            .env('GIT_COMMITTER_DATE', commitTime)
-            .env('GIT_AUTHOR_NAME', username)
-            .env('GIT_AUTHOR_EMAIL', email)
-            .env('GIT_COMMITTER_NAME', username)
-            .env('GIT_COMMITTER_EMAIL', email)
+            .env("GIT_AUTHOR_DATE", commitTime)
+            .env("GIT_COMMITTER_DATE", commitTime)
+            .env("GIT_AUTHOR_NAME", username)
+            .env("GIT_AUTHOR_EMAIL", email)
+            .env("GIT_COMMITTER_NAME", username)
+            .env("GIT_COMMITTER_EMAIL", email)
             .commit(commitMsg);
 
           totalCommits++;
 
           // Send progress to renderer
-          event.sender.send('commit-progress', {
+          event.sender.send("commit-progress", {
             repoName,
             current: totalCommits,
             total: grandTotal,
@@ -396,42 +424,66 @@ ipcMain.handle(
 
 // Fork: rewrite commit author/committer using git filter-branch
 ipcMain.handle(
-  'fork-repo',
+  "fork-repo",
   async (event, { repoName, forkEmail, username, email }) => {
-    const repoPath = path.join(REPO_DIR, repoName);
+    let repoPath = path.join(REPO_DIR, repoName);
     if (!fs.existsSync(repoPath)) {
-      return { success: false, message: 'Repository not found' };
+      return { success: false, message: "Repository not found" };
+    }
+    // Resolve symlink/junction to the actual directory
+    const stats = fs.lstatSync(repoPath);
+    if (stats.isSymbolicLink()) {
+      repoPath = fs.realpathSync(repoPath);
     }
     if (!username || !email) {
-      return { success: false, message: 'Username and email must be set in Settings' };
+      return {
+        success: false,
+        message: "Username and email must be set in Settings",
+      };
     }
 
     try {
-      const { execSync } = require('child_process');
+      const { execSync } = require("child_process");
 
       // Remove backup refs from any previous filter-branch run
-      const backupDir = path.join(repoPath, '.git', 'refs', 'original');
+      const backupDir = path.join(repoPath, ".git", "refs", "original");
       if (fs.existsSync(backupDir)) {
         fs.rmSync(backupDir, { recursive: true, force: true });
       }
 
-      const envFilter = `
-if [ "$GIT_AUTHOR_EMAIL" = "${forkEmail}" ]; then
-    GIT_AUTHOR_NAME="${username}"
-    GIT_AUTHOR_EMAIL="${email}"
-fi
-if [ "$GIT_COMMITTER_EMAIL" = "${forkEmail}" ]; then
-    GIT_COMMITTER_NAME="${username}"
-    GIT_COMMITTER_EMAIL="${email}"
-fi
-export GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL
-export GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL
-`;
+      const settings = loadSettings();
+      const gitBash = settings.gitBash;
+      if (!gitBash || !fs.existsSync(gitBash)) {
+        return {
+          success: false,
+          message: "Git Bash path not set or not found. Set it in Settings.",
+        };
+      }
+
+      // Write env-filter to a temp file to avoid shell escaping issues
+      const os = require('os');
+      const scriptLines = [
+        `if [ "$GIT_AUTHOR_EMAIL" = "${forkEmail}" ]; then`,
+        `  GIT_AUTHOR_NAME="${username}"`,
+        `  GIT_AUTHOR_EMAIL="${email}"`,
+        `fi`,
+        `if [ "$GIT_COMMITTER_EMAIL" = "${forkEmail}" ]; then`,
+        `  GIT_COMMITTER_NAME="${username}"`,
+        `  GIT_COMMITTER_EMAIL="${email}"`,
+        `fi`,
+        `export GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL`,
+        `export GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL`,
+      ];
+      const tmpFile = path.join(os.tmpdir(), 'commit-maker-env-filter.sh');
+      fs.writeFileSync(tmpFile, scriptLines.join('\n') + '\n', 'utf-8');
+      const tmpPath = tmpFile.replace(/\\/g, '/');
 
       execSync(
-        `git filter-branch -f --env-filter '${envFilter.replace(/'/g, "'\\''")}' --tag-name-filter cat -- --branches --tags`,
-        { cwd: repoPath, stdio: 'pipe', timeout: 300000 }
+        `git filter-branch -f --env-filter ". '${tmpPath}'" --tag-name-filter cat -- --branches --tags`,
+        { cwd: repoPath, shell: gitBash, stdio: 'pipe', timeout: 300000 },
       );
+
+      try { fs.unlinkSync(tmpFile); } catch (e) {}
 
       return { success: true };
     } catch (err) {
