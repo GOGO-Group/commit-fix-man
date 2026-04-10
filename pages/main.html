@@ -1404,6 +1404,14 @@
         if (!selectedRepo) return;
         const freq = randomFreqSlider.value / 10;
         const year = currentYear;
+
+        // Clear existing plans for this year first
+        await window.api.clearPlanRepo({ repoName: selectedRepo, year });
+        const prefix = String(year);
+        for (const date of Object.keys(currentPlan)) {
+          if (date.startsWith(prefix)) delete currentPlan[date];
+        }
+
         const startDate = new Date(year, 0, 1);
         const endDate = new Date(year, 11, 31);
 
@@ -1413,8 +1421,6 @@
           if (day === 0 || day === 6) continue;
 
           const dateStr = d.toISOString().substring(0, 10);
-          // Skip days that already have a plan
-          if (currentPlan[dateStr]) continue;
 
           if (Math.random() < freq) {
             const count = Math.floor(Math.random() * 3) + 1; // 1-3 commits
@@ -1428,7 +1434,7 @@
         }
 
         // Keep allPlans in sync
-        allPlans[selectedRepo] = { ...(allPlans[selectedRepo] || {}), ...currentPlan };
+        allPlans = await window.api.getAllPlans();
 
         // Update summary
         const totalForRepo = Object.values(currentPlan).reduce((s, v) => s + v, 0);

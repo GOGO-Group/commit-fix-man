@@ -333,6 +333,16 @@ ipcMain.handle(
       const dummyFile = path.join(repoPath, '.commit-log');
       let totalCommits = 0;
 
+      // Collect existing commit messages from the repo
+      const git0 = simpleGit(repoPath);
+      let repoMessages = [];
+      try {
+        const logResult = await git0.raw(['log', '--all', '--format=%s']);
+        if (logResult) {
+          repoMessages = logResult.trim().split('\n').filter(m => m.length > 0);
+        }
+      } catch (e) {}
+
       // Calculate grand total for progress
       const entries = Object.entries(plan).sort((a, b) => a[0].localeCompare(b[0]));
       const grandTotal = entries.reduce((s, [, c]) => s + c, 0);
@@ -352,7 +362,10 @@ ipcMain.handle(
           const git = simpleGit(repoPath);
           await git.add('.commit-log');
 
-          const commitMsg = `Edit commit for ${date} (${i + 1}/${count})`;
+          // Pick a random existing commit message, or fallback
+          const commitMsg = repoMessages.length > 0
+            ? repoMessages[Math.floor(Math.random() * repoMessages.length)]
+            : `Update ${date}`;
           await git
             .env('GIT_AUTHOR_DATE', commitTime)
             .env('GIT_COMMITTER_DATE', commitTime)
