@@ -613,7 +613,13 @@
           });
           container.appendChild(prevBtn);
 
+          const commitMin = sortedYears[0];
+          const commitMax = sortedYears[sortedYears.length - 1];
+
           fullYears.forEach((year) => {
+            const wrapper = document.createElement("span");
+            wrapper.className = "year-btn-wrapper";
+
             const btn = document.createElement("button");
             btn.textContent = year;
             btn.className =
@@ -623,7 +629,34 @@
               buildYearButtons();
               renderCalendars();
             });
-            container.appendChild(btn);
+            wrapper.appendChild(btn);
+
+            // Show close button for years outside the natural commit range
+            const outsideRange = year < commitMin || year > commitMax;
+            if (outsideRange && !years.has(year)) {
+              const closeBtn = document.createElement("button");
+              closeBtn.className = "year-btn-close";
+              closeBtn.textContent = "\u00d7";
+              closeBtn.title = "Remove " + year;
+              closeBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if (year < commitMin) {
+                  extraYearsBefore = commitMin - year - 1;
+                  if (extraYearsBefore < 0) extraYearsBefore = 0;
+                } else {
+                  extraYearsAfter = year - commitMax - 1;
+                  if (extraYearsAfter < 0) extraYearsAfter = 0;
+                }
+                if (currentYear === year) {
+                  currentYear = year < commitMin ? commitMin : commitMax;
+                  renderCalendars();
+                }
+                buildYearButtons();
+              });
+              wrapper.appendChild(closeBtn);
+            }
+
+            container.appendChild(wrapper);
           });
 
           // + button at the end (adds later year)

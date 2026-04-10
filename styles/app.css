@@ -319,6 +319,40 @@ body {
   color: #fff;
 }
 
+.year-btn-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+}
+
+.year-btn-close {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #da3633;
+  color: #fff;
+  border: none;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+  padding: 0;
+  cursor: pointer;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.year-btn-wrapper:hover .year-btn-close {
+  opacity: 1;
+}
+
+.year-btn-close:hover {
+  background: #f85149;
+}
+
 .year-btn-expand {
   font-weight: 700;
   font-size: 1rem !important;
