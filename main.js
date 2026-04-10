@@ -3,12 +3,20 @@ const path = require("path");
 const fs = require("fs");
 const simpleGit = require("simple-git");
 
-const REPO_DIR = path.join(__dirname, "repository");
-const FLAGS_FILE = path.join(__dirname, "repo-flags.json");
-const PLANS_FILE = path.join(__dirname, "commit-plans.json");
-const SETTINGS_FILE = path.join(__dirname, "settings.json");
+// Use userData directory for writable data (not __dirname which is read-only in packaged app)
+const DATA_DIR = app.isPackaged
+  ? path.join(app.getPath("userData"), "data")
+  : __dirname;
 
-// Ensure repository directory exists
+const REPO_DIR = path.join(DATA_DIR, "repository");
+const FLAGS_FILE = path.join(DATA_DIR, "repo-flags.json");
+const PLANS_FILE = path.join(DATA_DIR, "commit-plans.json");
+const SETTINGS_FILE = path.join(DATA_DIR, "settings.json");
+
+// Ensure data and repository directories exist
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
 if (!fs.existsSync(REPO_DIR)) {
   fs.mkdirSync(REPO_DIR, { recursive: true });
 }
@@ -61,6 +69,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    icon: path.join(__dirname, "static", "icon.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
